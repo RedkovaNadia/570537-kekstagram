@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Надежда Редькова](https://up.htmlacademy.ru/javascript/13/user/570537).
-* Наставник: `Неизвестно`.
+* Наставник: [Евгений Лепёшкин](https://up.htmlacademy.ru/javascript/13/user/144641).
 
 ---
 
