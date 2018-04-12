@@ -81,8 +81,16 @@ var renderBigPicture = function (object) {
   bigPictureElement.querySelector('.likes-count').textContent = object.likes;
   bigPictureElement.querySelector('.comments-count').textContent = object.comments.length;
   socialComment[1].classList.add('visually-hidden');
-  socialComment[0].querySelector('img').src = 'img/avatar-' + Math.round(getRandomNumber(1, 6)) + '.svg';
-  socialComment[0].textContent = object.comments;
+  socialComment[0].innerHTML = '';
+  var imgElement = document.createElement('img');
+  var spanElement = document.createElement('span');
+  imgElement.className = 'social__picture';
+  imgElement.src = 'img/avatar-' + Math.round(getRandomNumber(1, 6)) + '.svg';
+  imgElement.width = 35;
+  imgElement.height = 35;
+  spanElement.textContent = object.comments;
+  socialComment[0].appendChild(imgElement);
+  socialComment[0].appendChild(spanElement);
 };
 
 // отрисовка главной фотографии с данными первого объекта массива фотографий
