@@ -11,15 +11,15 @@ var getRandomNumber = function (min, max) {
 };
 
 // функция, возвращающая рандомный индекс массива
-var getRandomIndex = function (number) {
-  return Math.floor(Math.random() * number);
+var getRandomIndex = function (array) {
+  return Math.round(getRandomNumber(0, (array.length - 1)));
 };
 
 var shuffleArray = function (array) { // ф-ция, которая мешает массив
   var arrayCopy = array.slice();
   var mixedArray = [];
   while (mixedArray.length < array.length) {
-    var randomIndex = getRandomIndex(arrayCopy.length);
+    var randomIndex = getRandomIndex(arrayCopy);
     mixedArray.push(arrayCopy[randomIndex]);
     arrayCopy.splice(randomIndex, 1);
   }
@@ -31,10 +31,10 @@ var getPhotoObject = function (index) {
   var commentsArrayShuffleCopy = shuffleArray(COMMENTS);
   commentsArrayShuffleCopy.splice(1, COMMENTS.length);
   return {
-    'url': 'photos/' + index + '.jpg',
+    'url': 'photos/' + (index + 1) + '.jpg',
     'likes': Math.round(getRandomNumber(15, 200)),
     'comments': commentsArrayShuffleCopy,
-    'description': getRandomIndex(DESCRIPTIONS.length)
+    'description': DESCRIPTIONS[getRandomIndex(DESCRIPTIONS)]
   };
 };
 // генерирую массив из 25 объектов-фотографий
@@ -42,16 +42,17 @@ var photos = [];
 for (var i = 0; i < NUMBER_OF_PHOTOS; i++) {
   photos.push(getPhotoObject(i));
 }
-// нахожу нужный шаблон и клонирую его
-var pictureTemplate = document.querySelector('#picture');
-var photoElement = pictureTemplate.cloneNode(true);
+
+var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture__link');
 
 // На основе данных объектов массива и шаблона создаю DOM-элементы, соответствующие фотографиям и заполняю их данными из массива
 var createPhotoElement = function (object) {
+  // нахожу нужный шаблон и клонирую его
+  var photoElement = pictureTemplate.cloneNode(true);
 
-  photoElement.content.querySelector('.picture__img').src = object.url;
-  photoElement.content.querySelector('.picture__stat--likes').textContent = object.likes;
-  photoElement.content.querySelector('.picture__stat--comments').textContent = object.comments;
+  photoElement.querySelector('.picture__img').src = object.url;
+  photoElement.querySelector('.picture__stat--likes').textContent = object.likes;
+  photoElement.querySelector('.picture__stat--comments').textContent = object.comments.length;
 
   return photoElement;
 };
@@ -59,6 +60,7 @@ var createPhotoElement = function (object) {
 // добиваюсь нужного мне количества фотографий при помощи ф-ции с циклом внутри, вставляю каждую во фрагмент и далее - в DOM
 var picturesBlock = document.querySelector('.pictures');
 var documentFragment = document.createDocumentFragment();
+
 var renderPhotos = function () {
   for (i = 0; i < photos.length; i++) {
     documentFragment.appendChild(createPhotoElement(photos[i]));
@@ -70,17 +72,20 @@ renderPhotos();
 var bigPictureElement = document.querySelector('.big-picture');
 bigPictureElement.classList.remove('hidden');
 
+var socialComments = bigPictureElement.querySelector('.social__comments');
+var socialComment = socialComments.querySelectorAll('.social__comment');
+
+// ф-ция заполнения элемента фотографии данными
 var renderBigPicture = function (object) {
   bigPictureElement.querySelector('.big-picture__img').src = object.url;
   bigPictureElement.querySelector('.likes-count').textContent = object.likes;
   bigPictureElement.querySelector('.comments-count').textContent = object.comments.length;
-
-  var socialComments = bigPictureElement.querySelectorAll('.social__comment');
-  socialComments[0].querySelector('.social__picture').src = 'img/avatar-' + Math.round(getRandomNumber(1, 6)) + '.svg';
-  socialComments[0].textContent = object.comments;
-  socialComments[1].classList.add('visually-hidden');
+  socialComment[1].classList.add('visually-hidden');
+  socialComment[0].querySelector('img').src = 'img/avatar-' + Math.round(getRandomNumber(1, 6)) + '.svg';
+  socialComment[0].textContent = object.comments;
 };
 
+// отрисовка главной фотографии с данными первого объекта массива фотографий
 renderBigPicture(photos[0]);
 
 // Прячу блоки счётчика комментариев и загрузки новых комментариев
