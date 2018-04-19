@@ -187,6 +187,11 @@ var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
 // обработчик, добавляющий эффекты (добавлением соответствующего класса картинке)
 var onEffectRadioElementClick = function (evt) {
   imgUploadPreview.className = 'effects__preview--' + evt.target.value;
+  if (imgUploadPreview.className === 'effects__preview--none') {
+    imgUploadScale.classList.add('hidden');
+  } else {
+    imgUploadScale.classList.remove('hidden');
+  }
 };
 
 // циклом вешаем обработчики на все элементы
@@ -216,59 +221,72 @@ var onResizePlusButtonClick = function () {
   if (parseInt(resizeControlValue, 10) >= 25 && parseInt(resizeControlValue, 10) <= 75) {
     resizeControlValue = (parseInt(resizeControlValue, 10) + 25) + '%';
     resizeControlValueInput.value = resizeControlValue;
-    // console.log(resizeControlValue);
-    if (parseInt(resizeControlValue, 10) === 100) {
-      imgUploadPreview.style = 'transform: scale(1)';
-    } else {
-      imgUploadPreview.style = 'transform: scale(0.' + parseInt(resizeControlValue, 10) + ')';
-    }
+    imgUploadPreview.style = 'transform: scale(0.' + parseInt(resizeControlValue, 10) + ')';
   }
+  if (parseInt(resizeControlValue, 10) === 100) {
+    resizeControlValue = parseInt(resizeControlValue, 10) + '%';
+    resizeControlValueInput.value = resizeControlValue;
+    imgUploadPreview.style = 'transform: scale(1)';
+  }
+  // console.log(resizeControlValue);
 };
 
 resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
 resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
+
 // ползунок
 
+var imgUploadScale = document.querySelector('.img-upload__scale');
+var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
+var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
+var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
+
 /*
-var effectFilter = {
-  'chrome': 'filter: grayscale(0..1)', // 1 * scalePinLevel / 100;
-  'sepia': 'filter: sepia(0..1)', // 1 * scalePinLevel / 100;
-  'marvin': 'filter: invert(0..100%)', // scalePinLevel
-  'phobos': 'filter: blur(0..3px)', // 3 * scalePinLevel / 100 + 'px';
-  'heat': 'filter: brightness(1..3)' //
+var effectFormula = {
+  'chrome': 'filter: grayscale(' + (1 * scalePinLevel / 100) + ')',
+  'sepia': 'filter: sepia(' + (1 * scalePinLevel / 100) + ')',
+  'marvin': 'filter: invert(' + scalePinLevel + ')',
+  'phobos': 'filter: blur(' + (3 * scalePinLevel / 100) + 'px)',
+   // 'heat': 'filter: brightness(1..3)'
 };
 */
 
-var scaleLine = document.querySelector('.scale__line'); // находим блок слайдера
-var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
-var scaleValue = document.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
-var scaleLineWidth = scaleLine.style.width; // находим ширину блока слайдера
-// var scaleLineWidth = 453; // данные о ширине из elements
+var setImgClass = function (img, level) {
+  var filerFormula;
 
-// высчитываем уровень насыщенности через пропорцию
-var scalePinLevel = scalePin.left * 100 / scaleLineWidth;
+  switch (img.className) {
+    case 'effects__preview--chrome':
+      filerFormula = 'filter: grayscale(' + (level / 100) + ')';
+      break;
+
+    case 'effects__preview--sepia':
+      filerFormula = 'filter: sepia(' + (level / 100) + ')';
+      break;
+
+    case 'effects__preview--marvin':
+      filerFormula = 'filter: invert(' + level + ')';
+      break;
+
+    case 'effects__preview--phobos':
+      filerFormula = 'filter: blur(' + (3 * level / 100) + 'px)';
+      break;
+
+    case 'effects__preview--heat':
+      // filerFormula = ;
+      break;
+  }
+  imgUploadPreview.style.filter = filerFormula;
+  // console.log(imgUploadPreview.style.filter);
+};
+
 
 scalePin.addEventListener('mouseup', function () {
-  // console.log(scaleLineWidth);
-  // console.log(scalePin.left);
+  var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
+  // высчитываем уровень насыщенности через пропорцию
+  var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
   scaleValue.value = scalePinLevel;
-  // console.log(scaleValue.value);
-  // обновляем фильтр большой картинки (незаконченное)
-  // imgUploadPreview.style.filter =
+  // console.log(scaleLineWidth, scalePin.offsetLeft, scalePinLevel, scaleValue.value);
+  // обновляем фильтр большой картинки
+  setImgClass(imgUploadPreview, scalePinLevel);
 });
-
-
-// ----- черновики - уберу
-
-// console.log(scalePin.getBoundingClientRect());
-// console.log(scalePin.position());
-// console.log(scalePin.offsetHeight);
-
-// var pinCoordinates = scalePin.getBoundingClientRect();
-// var scalePinLevel = scalePin.style.left * 100 / scaleLineWidth;
-// var scalePinLevel = pinCoordinates.left * 100 / scaleLineWidth;
-
-// scaleLineWidth = 100%
-// scalePin.offsetLeft = x;
-// x = scalePin.offsetLeft * 100 / scaleLineWidth
