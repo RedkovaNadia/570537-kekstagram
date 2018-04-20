@@ -207,7 +207,40 @@ var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--
 resizeControlValueInput.value = '100%';
 var resizeControlValue = resizeControlValueInput.value;
 
-// обработчики, увеличивающие и уменьшающие масштаб загруженного фото
+var resize = {
+  STEP: 25,
+  MAX: 100,
+  MIN: 25
+};
+
+var printResizeValue = function (number) {
+  // взамен resizeControlValue.value
+  resizeControlValue = number + '%';
+};
+
+var onResizePlusButtonClick = function () {
+  var resizeValue = parseInt(resizeControlValue, 10) + resize.STEP;
+  resizeValue = (resizeValue > resize.MAX) ? resize.MAX : resizeValue;
+
+  printResizeValue(resizeValue);
+  // добавила изменение в стилях
+  imgUploadPreview.style = (resizeValue === 100) ? 'transform: scale(1)' : 'transform: scale(0.' + resizeValue + ')';
+};
+
+var onResizeMinusButtonClick = function () {
+  var resizeValue = parseInt(resizeControlValue, 10) - resize.STEP;
+  resizeValue = (resizeValue < resize.MIN) ? resize.MIN : resizeValue;
+
+  printResizeValue(resizeValue);
+  // добавила изменение в стилях
+  imgUploadPreview.style = 'transform: scale(0.' + resizeValue + ')';
+};
+
+resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
+resizePlusButton.addEventListener('click', onResizePlusButtonClick);
+
+// обработчики, увеличивающие и уменьшающие масштаб загруженного фото ---- СТАРЫЙ КОД
+/*
 var onResizeMinusButtonClick = function () {
   if (parseInt(resizeControlValue, 10) >= 50) {
     resizeControlValue = (parseInt(resizeControlValue, 10) - 25) + '%';
@@ -230,10 +263,7 @@ var onResizePlusButtonClick = function () {
   }
   // console.log(resizeControlValue);
 };
-
-resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
-resizePlusButton.addEventListener('click', onResizePlusButtonClick);
-
+*/
 
 // ползунок
 
@@ -243,6 +273,8 @@ var scaleValue = imgUploadScale.querySelector('.scale__value'); // находи�
 var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
 
 /*
+// объект с формулами
+
 var effectFormula = {
   'chrome': 'filter: grayscale(' + (1 * scalePinLevel / 100) + ')',
   'sepia': 'filter: sepia(' + (1 * scalePinLevel / 100) + ')',
