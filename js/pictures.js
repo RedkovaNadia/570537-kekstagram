@@ -49,6 +49,7 @@ var bigPictureCancel = bigPictureElement.querySelector('.big-picture__cancel');
 var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture__link');
 
 // ----------------------------------------------
+// НАЧИНАЕМ РАБОТАТЬ С ОБРАБОТЧИКАМИ СОБЫТИЙ
 // ф-ция закрывает большую фотографию по нажатию esc на документа
 var onBigPictureEscPress = function (evt) {
   if (evt.keyCode === ESC_KEYCODE) {
@@ -140,7 +141,8 @@ var socialCommentLoadmoreClass = '.social__comment-loadmore';
 addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
 addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
 
-// ------------------------------------
+// -----------------------------------------
+// Работаем с окном редактирования загруженного фото
 var uploadFileInput = document.querySelector('#upload-file');
 var imgUploadOverlay = document.querySelector('.img-upload__overlay');
 var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
@@ -199,7 +201,8 @@ for (i = 0; i < effectsRadioElements.length; i++) {
   effectsRadioElements[i].addEventListener('click', onEffectRadioElementClick);
 }
 
-// изменяем масштаб
+// --------------------------------------------------
+// Работаем с масщтабом загруженного фото
 var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
 var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
 var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
@@ -265,7 +268,8 @@ var onResizePlusButtonClick = function () {
 };
 */
 
-// ползунок
+// ------------------------------------------------
+// Работаем с ползунком -- для начала вводим все нужные переменные
 
 var imgUploadScale = document.querySelector('.img-upload__scale');
 var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
@@ -273,7 +277,7 @@ var scaleValue = imgUploadScale.querySelector('.scale__value'); // находи�
 var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
 
 /*
-// объект с формулами
+// объект с формулами расчета для фильтров
 
 var effectFormula = {
   'chrome': 'filter: grayscale(' + (1 * scalePinLevel / 100) + ')',
@@ -290,18 +294,19 @@ var setImgClass = function (img, level) {
   switch (img.className) {
     case 'effects__preview--chrome':
       filerFormula = 'filter: grayscale(' + (level / 100) + ')';
+      filerFormula = 'grayscale(' + (level / 100) + ')';
       break;
 
     case 'effects__preview--sepia':
-      filerFormula = 'filter: sepia(' + (level / 100) + ')';
+      filerFormula = 'sepia(' + (level / 100) + ')';
       break;
 
     case 'effects__preview--marvin':
-      filerFormula = 'filter: invert(' + level + ')';
+      filerFormula = 'invert(' + level + ')';
       break;
 
     case 'effects__preview--phobos':
-      filerFormula = 'filter: blur(' + (3 * level / 100) + 'px)';
+      filerFormula = 'blur(' + (3 * level / 100) + 'px)';
       break;
 
     case 'effects__preview--heat':
@@ -309,10 +314,9 @@ var setImgClass = function (img, level) {
       break;
   }
   imgUploadPreview.style.filter = filerFormula;
-  // console.log(imgUploadPreview.style.filter);
 };
 
-
+// вешаем обработчик отпаускания мыши на пин слайдреа
 scalePin.addEventListener('mouseup', function () {
   var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
   // высчитываем уровень насыщенности через пропорцию
@@ -321,4 +325,49 @@ scalePin.addEventListener('mouseup', function () {
   // console.log(scaleLineWidth, scalePin.offsetLeft, scalePinLevel, scaleValue.value);
   // обновляем фильтр большой картинки
   setImgClass(imgUploadPreview, scalePinLevel);
+  // console.log(imgUploadPreview.style.filter);
 });
+
+// --------------------------------------------
+// Валидация - работа с хештегами
+var TAG_MAX_LENGTH = 20;
+var TAG_MIN_LENGTH = 2;
+var TAGS_MAX_QUANTITY = 5;
+
+hashtagInput.addEventListener('input', function () {
+  var hashtagsString = hashtagInput.value.trim();
+  var hashtags = hashtagsString.split(' ');
+  var correct = true;
+  // console.log(hashtags, hashtags.length);
+
+  if (hashtags.length > 0) {
+    for (i = 0; i < hashtags.length; i++) {
+      if (hashtags[i].length > TAG_MAX_LENGTH) {
+        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
+        correct = false;
+      }
+      if (hashtags[i].length < TAG_MIN_LENGTH) {
+        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
+        correct = false;
+      }
+      if (hashtags[i].charAt(0) !== '#') {
+        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+        correct = false;
+      }
+      if (hashtags.length > TAGS_MAX_QUANTITY) {
+        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
+        correct = false;
+      }
+      if (correct) {
+        hashtagInput.setCustomValidity('');
+      }
+    }
+  }
+});
+
+// работаем с полем ввода комментариев
+descriptionTextarea.maxLength = 140;
+
+var imgUploadForm = document.querySelector('.img-upload__form');
+imgUploadForm.action = 'https://js.dump.academy/kekstagram';
+
