@@ -188,7 +188,9 @@ var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
 
 // обработчик, добавляющий эффекты (добавлением соответствующего класса картинке)
 var onEffectRadioElementClick = function (evt) {
+  // scaleValue.value = null;
   imgUploadPreview.className = 'effects__preview--' + evt.target.value;
+  // scaleValue.value = '100';
   if (imgUploadPreview.className === 'effects__preview--none') {
     imgUploadScale.classList.add('hidden');
   } else {
@@ -370,4 +372,6 @@ descriptionTextarea.maxLength = 140;
 
 var imgUploadForm = document.querySelector('.img-upload__form');
 imgUploadForm.action = 'https://js.dump.academy/kekstagram';
+
+
 
