@@ -54,7 +54,6 @@ var pictureTemplate = document.querySelector('#picture').content.querySelector('
 var onBigPictureEscPress = function (evt) {
   if (evt.keyCode === ESC_KEYCODE) {
     onBigPictureCancelClick();
-    // console.log('esc');
   }
 };
 
@@ -68,7 +67,6 @@ var openBigPicture = function () {
 var onBigPictureCancelClick = function () {
   bigPictureElement.classList.add('hidden');
   document.removeEventListener('keydown', onBigPictureEscPress);
-  // console.log('closeBigPicture');
 };
 
 // На основе данных объектов массива и шаблона создаю DOM-элементы, соответствующие фотографиям и заполняю их данными из массива
@@ -84,7 +82,6 @@ var createPhotoElement = function (object) {
   photoElement.addEventListener('click', function () {
     renderBigPicture(object);
     openBigPicture();
-    // console.log('photoClick');
   });
 
   return photoElement;
@@ -154,10 +151,8 @@ var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
 var onUploadOverlayEscPress = function (evt) {
   if (hashtagInput === document.activeElement || descriptionTextarea === document.activeElement) {
     evt.stopPropagation();
-    // console.log('stopPropagation');
   } else if (evt.keyCode === ESC_KEYCODE) {
     onImgUploadCancelClick();
-    // console.log('esc');
   }
 };
 
@@ -173,7 +168,6 @@ var onImgUploadCancelClick = function () {
   // сбрасываем значение инпута загрузки, чтобы было возможно загружать одно фото повторно
   uploadFileInput.value = null;
   document.removeEventListener('keydown', onUploadOverlayEscPress);
-  // console.log('closeUploadOverlay');
 };
 
 // добавление обработчика открытия окна редактирования фото на форму загрузки нового фото
@@ -182,16 +176,28 @@ uploadFileInput.addEventListener('change', onUploadFileInputChange);
 // добавление обработчика закрытия окна редактирования фото на крестик окна редактирования
 imgUploadCancel.addEventListener('click', onImgUploadCancelClick);
 
+// ---------------------- ЭФФЕКТЫ
+
 // добавляем эффекты на загруженное фото
 var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
 var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
+var prevClass = 'effects__preview--none';
+
+// ф-ция, которая добавляет класс картинке в зависимости от выбранного фильтра
+var applyImageFilter = function (selected) {
+  var newClass = 'effects__preview--' + selected;
+
+  // добавляем картинке новый класс
+  imgUploadPreview.classList.add(newClass);
+  imgUploadPreview.classList.remove(prevClass);
+
+  prevClass = newClass;
+};
 
 // обработчик, добавляющий эффекты (добавлением соответствующего класса картинке)
 var onEffectRadioElementClick = function (evt) {
-  // scaleValue.value = null;
-  imgUploadPreview.className = 'effects__preview--' + evt.target.value;
-  // scaleValue.value = '100';
-  if (imgUploadPreview.className === 'effects__preview--none') {
+  applyImageFilter(evt.target.value);
+  if (imgUploadPreview.classList.contains('effects__preview--none')) {
     imgUploadScale.classList.add('hidden');
   } else {
     imgUploadScale.classList.remove('hidden');
@@ -199,124 +205,81 @@ var onEffectRadioElementClick = function (evt) {
 };
 
 // циклом вешаем обработчики на все элементы
-for (i = 0; i < effectsRadioElements.length; i++) {
-  effectsRadioElements[i].addEventListener('click', onEffectRadioElementClick);
-}
+[].forEach.call(effectsRadioElements, function (filter) {
+  filter.addEventListener('click', onEffectRadioElementClick);
+});
 
-// --------------------------------------------------
-// Работаем с масщтабом загруженного фото
+// -------------------------------- Работаем с масштабом загруженного фото
 var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
 var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
 var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
 
-resizeControlValueInput.value = '100%';
-var resizeControlValue = resizeControlValueInput.value;
-
-var resize = {
+var Resize = {
   STEP: 25,
   MAX: 100,
   MIN: 25
 };
 
+var imageResize = function (resizeValue) {
+  imgUploadPreview.style = 'transform: scale(' + (resizeValue / 100) + ')';
+};
+
 var printResizeValue = function (number) {
-  // взамен resizeControlValue.value
-  resizeControlValue = number + '%';
+  resizeControlValueInput.value = number + '%';
+  imageResize(number);
 };
 
 var onResizePlusButtonClick = function () {
-  var resizeValue = parseInt(resizeControlValue, 10) + resize.STEP;
-  resizeValue = (resizeValue > resize.MAX) ? resize.MAX : resizeValue;
+  var resizeValue = parseInt(resizeControlValueInput.value, 10) + Resize.STEP;
+  resizeValue = (resizeValue > Resize.MAX) ? Resize.MAX : resizeValue;
 
   printResizeValue(resizeValue);
-  // добавила изменение в стилях
-  imgUploadPreview.style = (resizeValue === 100) ? 'transform: scale(1)' : 'transform: scale(0.' + resizeValue + ')';
 };
 
 var onResizeMinusButtonClick = function () {
-  var resizeValue = parseInt(resizeControlValue, 10) - resize.STEP;
-  resizeValue = (resizeValue < resize.MIN) ? resize.MIN : resizeValue;
+  var resizeValue = parseInt(resizeControlValueInput.value, 10) - Resize.STEP;
+  resizeValue = (resizeValue < Resize.MIN) ? Resize.MIN : resizeValue;
 
   printResizeValue(resizeValue);
-  // добавила изменение в стилях
-  imgUploadPreview.style = 'transform: scale(0.' + resizeValue + ')';
 };
 
 resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
 resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
-// обработчики, увеличивающие и уменьшающие масштаб загруженного фото ---- СТАРЫЙ КОД
-/*
-var onResizeMinusButtonClick = function () {
-  if (parseInt(resizeControlValue, 10) >= 50) {
-    resizeControlValue = (parseInt(resizeControlValue, 10) - 25) + '%';
-    resizeControlValueInput.value = resizeControlValue;
-    // console.log(resizeControlValue);
-    imgUploadPreview.style = 'transform: scale(0.' + parseInt(resizeControlValue, 10) + ')';
-  }
-};
-
-var onResizePlusButtonClick = function () {
-  if (parseInt(resizeControlValue, 10) >= 25 && parseInt(resizeControlValue, 10) <= 75) {
-    resizeControlValue = (parseInt(resizeControlValue, 10) + 25) + '%';
-    resizeControlValueInput.value = resizeControlValue;
-    imgUploadPreview.style = 'transform: scale(0.' + parseInt(resizeControlValue, 10) + ')';
-  }
-  if (parseInt(resizeControlValue, 10) === 100) {
-    resizeControlValue = parseInt(resizeControlValue, 10) + '%';
-    resizeControlValueInput.value = resizeControlValue;
-    imgUploadPreview.style = 'transform: scale(1)';
-  }
-  // console.log(resizeControlValue);
-};
-*/
-
-// ------------------------------------------------
-// Работаем с ползунком -- для начала вводим все нужные переменные
+// ------------------------------------------------ Работаем с ползунком -- для начала вводим все нужные переменные
 
 var imgUploadScale = document.querySelector('.img-upload__scale');
 var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
 var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
 var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
 
-/*
-// объект с формулами расчета для фильтров
-
-var effectFormula = {
-  'chrome': 'filter: grayscale(' + (1 * scalePinLevel / 100) + ')',
-  'sepia': 'filter: sepia(' + (1 * scalePinLevel / 100) + ')',
-  'marvin': 'filter: invert(' + scalePinLevel + ')',
-  'phobos': 'filter: blur(' + (3 * scalePinLevel / 100) + 'px)',
-   // 'heat': 'filter: brightness(1..3)'
-};
-*/
-
 var setImgClass = function (img, level) {
-  var filerFormula;
+  var effectFilter;
 
   switch (img.className) {
     case 'effects__preview--chrome':
-      filerFormula = 'filter: grayscale(' + (level / 100) + ')';
-      filerFormula = 'grayscale(' + (level / 100) + ')';
+      effectFilter = 'grayscale(' + (level / 100) + ')';
       break;
 
     case 'effects__preview--sepia':
-      filerFormula = 'sepia(' + (level / 100) + ')';
+      effectFilter = 'sepia(' + (level / 100) + ')';
       break;
 
     case 'effects__preview--marvin':
-      filerFormula = 'invert(' + level + ')';
+      effectFilter = 'invert(' + level + ')';
       break;
 
     case 'effects__preview--phobos':
-      filerFormula = 'blur(' + (3 * level / 100) + 'px)';
+      effectFilter = 'blur(' + (3 * level / 100) + 'px)';
       break;
 
     case 'effects__preview--heat':
-      // filerFormula = ;
+      effectFilter = 'brightness(' + (level) + '%)';
       break;
   }
-  imgUploadPreview.style.filter = filerFormula;
+  imgUploadPreview.style.filter = effectFilter;
 };
+
 
 // вешаем обработчик отпаускания мыши на пин слайдреа
 scalePin.addEventListener('mouseup', function () {
@@ -326,52 +289,8 @@ scalePin.addEventListener('mouseup', function () {
   scaleValue.value = scalePinLevel;
   // console.log(scaleLineWidth, scalePin.offsetLeft, scalePinLevel, scaleValue.value);
   // обновляем фильтр большой картинки
+  var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
+  applyImageFilter(selectedFilter.value);
   setImgClass(imgUploadPreview, scalePinLevel);
   // console.log(imgUploadPreview.style.filter);
 });
-
-// --------------------------------------------
-// Валидация - работа с хештегами
-var TAG_MAX_LENGTH = 20;
-var TAG_MIN_LENGTH = 2;
-var TAGS_MAX_QUANTITY = 5;
-
-hashtagInput.addEventListener('input', function () {
-  var hashtagsString = hashtagInput.value.trim();
-  var hashtags = hashtagsString.split(' ');
-  var correct = true;
-  // console.log(hashtags, hashtags.length);
-
-  if (hashtags.length > 0) {
-    for (i = 0; i < hashtags.length; i++) {
-      if (hashtags[i].length > TAG_MAX_LENGTH) {
-        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
-        correct = false;
-      }
-      if (hashtags[i].length < TAG_MIN_LENGTH) {
-        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
-        correct = false;
-      }
-      if (hashtags[i].charAt(0) !== '#') {
-        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
-        correct = false;
-      }
-      if (hashtags.length > TAGS_MAX_QUANTITY) {
-        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
-        correct = false;
-      }
-      if (correct) {
-        hashtagInput.setCustomValidity('');
-      }
-    }
-  }
-});
-
-// работаем с полем ввода комментариев
-descriptionTextarea.maxLength = 140;
-
-var imgUploadForm = document.querySelector('.img-upload__form');
-imgUploadForm.action = 'https://js.dump.academy/kekstagram';
-
-
-
