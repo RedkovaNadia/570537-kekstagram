@@ -294,3 +294,51 @@ scalePin.addEventListener('mouseup', function () {
   setImgClass(imgUploadPreview, scalePinLevel);
   // console.log(imgUploadPreview.style.filter);
 });
+
+// --------------------------------------------
+// Валидация - работа с хештегами
+var TAG_MAX_LENGTH = 20;
+var TAG_MIN_LENGTH = 2;
+var TAGS_MAX_QUANTITY = 5;
+
+hashtagInput.addEventListener('input', function () {
+  var hashtagsString = hashtagInput.value.trim();
+  var hashtags = hashtagsString.split(' ');
+  var correct = true;
+
+  if (hashtags.length > 0) {
+    for (i = 0; i < hashtags.length; i++) {
+      if (hashtags[i].length > TAG_MAX_LENGTH) {
+        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
+        correct = false;
+      }
+      if (hashtags[i].length < TAG_MIN_LENGTH) {
+        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
+        correct = false;
+      }
+      if (hashtags[i] === '#') {
+        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+        correct = false;
+      }
+      if (hashtags.length > TAGS_MAX_QUANTITY) {
+        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
+        correct = false;
+      }
+      // создаем новый массив и добавляем в него повторяющеся элементы из исходного массива хэш-тегов -
+      // - на каждой итерации в новый массив записыватся повторения одного и того же хештега
+      var newArr = [];
+      hashtags.forEach(function (item) {
+        if (item === hashtags[i]) {
+          newArr.push(item);
+        }
+      });
+      if (newArr.length > 1) {
+        hashtagInput.setCustomValidity('Хеш-тэги не должны повторяться');
+        correct = false;
+      }
+      if (correct) {
+        hashtagInput.setCustomValidity('');
+      }
+    }
+  }
+});
