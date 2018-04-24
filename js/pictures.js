@@ -287,12 +287,10 @@ scalePin.addEventListener('mouseup', function () {
   // высчитываем уровень насыщенности через пропорцию
   var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
   scaleValue.value = scalePinLevel;
-  // console.log(scaleLineWidth, scalePin.offsetLeft, scalePinLevel, scaleValue.value);
   // обновляем фильтр большой картинки
   var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
   applyImageFilter(selectedFilter.value);
   setImgClass(imgUploadPreview, scalePinLevel);
-  // console.log(imgUploadPreview.style.filter);
 });
 
 // --------------------------------------------
