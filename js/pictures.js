@@ -340,3 +340,51 @@ hashtagInput.addEventListener('input', function () {
     }
   }
 });
+
+
+// ----------------------------------------------------- Движение пина
+/*
+scalePin.addEventListener('mousedown', function (evt) {
+
+  // получаем стартовые координаты курсора
+  var startCoords = {
+    x: evt.clientX
+    // y: evt.clientY
+  };
+
+  var onMouseMove = function (moveEvt) {
+    // вычисляем расстояние, на которое сместился курсор мыши
+    var shift = {
+      x: startCoords.x - moveEvt.clientX
+      // y: startCoords.y - moveEvt.clientY
+    };
+    // переписываем 'точку отсчета' - она каждый раз меняется
+    startCoords = {
+      x: moveEvt.clientX
+      // y: moveEvt.clientY
+    };
+    // в координаты пина записываем новые координаты
+    // scalePin.style.top = (scalePin.offsetTop - shift.y) + 'px';
+    scalePin.style.left = (scalePin.offsetLeft - shift.x) + 'px';
+
+
+    var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
+    // высчитываем уровень насыщенности через пропорцию
+    var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
+    scaleValue.value = scalePinLevel;
+    // обновляем фильтр большой картинки
+    var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
+    applyImageFilter(selectedFilter.value);
+    setImgClass(imgUploadPreview, scalePinLevel);
+
+  };
+
+  var onMouseUp = function () {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
+*/
