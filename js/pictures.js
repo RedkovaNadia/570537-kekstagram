@@ -145,6 +145,7 @@ var imgUploadOverlay = document.querySelector('.img-upload__overlay');
 var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
 var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
 var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
+var imgUploadScale = document.querySelector('.img-upload__scale');
 
 // ф-ция-обработчик, которая закрывает окно редактирования по нажатию на esc
 // (и не закрывает, если инпут ввода хэш-тега или комментария в фокусе)
@@ -160,6 +161,7 @@ var onUploadOverlayEscPress = function (evt) {
 var onUploadFileInputChange = function () {
   imgUploadOverlay.classList.remove('hidden');
   document.addEventListener('keydown', onUploadOverlayEscPress);
+  imgUploadScale.classList.add('hidden');
 };
 
 // ф-ция закрывает окно редактирования загруженного фото и удаляет обработчик закрытия окна настройки по нажатия esc на документе
@@ -181,7 +183,48 @@ imgUploadCancel.addEventListener('click', onImgUploadCancelClick);
 // добавляем эффекты на загруженное фото
 var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
 var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
+var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
+var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
 var prevClass = 'effects__preview--none';
+var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
+var scaleLevel = scaleLine.querySelector('.scale__level');
+
+var getFilterLevel = function () {
+  return parseInt(scaleValue.value, 10);
+};
+
+var setFilterLevel = function (number) {
+  scaleValue.value = number;
+  scalePin.style.left = number + '%';
+  scaleLevel.style.width = number + '%';
+};
+
+var setImgClass = function (img, level, selected) {
+  var effectFilter;
+
+  switch (selected) {
+    case 'chrome':
+      effectFilter = 'grayscale(' + (level / 100) + ')';
+      break;
+
+    case 'sepia':
+      effectFilter = 'sepia(' + (level / 100) + ')';
+      break;
+
+    case 'marvin':
+      effectFilter = 'invert(' + level + ')';
+      break;
+
+    case 'phobos':
+      effectFilter = 'blur(' + (3 * level / 100) + 'px)';
+      break;
+
+    case 'heat':
+      effectFilter = 'brightness(' + (level) + '%)';
+      break;
+  }
+  img.style.filter = effectFilter;
+};
 
 // ф-ция, которая добавляет класс картинке в зависимости от выбранного фильтра
 var applyImageFilter = function (selected) {
@@ -190,6 +233,8 @@ var applyImageFilter = function (selected) {
   // добавляем картинке новый класс
   imgUploadPreview.classList.add(newClass);
   imgUploadPreview.classList.remove(prevClass);
+
+  setImgClass(imgUploadPreview, getFilterLevel(), selected);
 
   prevClass = newClass;
 };
@@ -248,50 +293,19 @@ resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
 // ------------------------------------------------ Работаем с ползунком -- для начала вводим все нужные переменные
 
-var imgUploadScale = document.querySelector('.img-upload__scale');
-var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
-var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
-var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
-
-var setImgClass = function (img, level) {
-  var effectFilter;
-
-  switch (img.className) {
-    case 'effects__preview--chrome':
-      effectFilter = 'grayscale(' + (level / 100) + ')';
-      break;
-
-    case 'effects__preview--sepia':
-      effectFilter = 'sepia(' + (level / 100) + ')';
-      break;
-
-    case 'effects__preview--marvin':
-      effectFilter = 'invert(' + level + ')';
-      break;
-
-    case 'effects__preview--phobos':
-      effectFilter = 'blur(' + (3 * level / 100) + 'px)';
-      break;
-
-    case 'effects__preview--heat':
-      effectFilter = 'brightness(' + (level) + '%)';
-      break;
-  }
-  imgUploadPreview.style.filter = effectFilter;
-};
-
-
 // вешаем обработчик отпаускания мыши на пин слайдреа
 scalePin.addEventListener('mouseup', function () {
   var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
   // высчитываем уровень насыщенности через пропорцию
   var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
-  scaleValue.value = scalePinLevel;
+  setFilterLevel(scalePinLevel);
   // обновляем фильтр большой картинки
   var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
   applyImageFilter(selectedFilter.value);
-  setImgClass(imgUploadPreview, scalePinLevel);
+  setImgClass(imgUploadPreview, scalePinLevel, selectedFilter.value);
 });
+
+setFilterLevel(100);
 
 // --------------------------------------------
 // Валидация - работа с хештегами
@@ -341,7 +355,6 @@ hashtagInput.addEventListener('input', function () {
   }
 });
 
-
 // ----------------------------------------------------- Движение пина
 /*
 scalePin.addEventListener('mousedown', function (evt) {
@@ -349,37 +362,35 @@ scalePin.addEventListener('mousedown', function (evt) {
   // получаем стартовые координаты курсора
   var startCoords = {
     x: evt.clientX
-    // y: evt.clientY
   };
 
   var onMouseMove = function (moveEvt) {
     // вычисляем расстояние, на которое сместился курсор мыши
     var shift = {
       x: startCoords.x - moveEvt.clientX
-      // y: startCoords.y - moveEvt.clientY
     };
     // переписываем 'точку отсчета' - она каждый раз меняется
     startCoords = {
       x: moveEvt.clientX
-      // y: moveEvt.clientY
     };
     // в координаты пина записываем новые координаты
-    // scalePin.style.top = (scalePin.offsetTop - shift.y) + 'px';
-    scalePin.style.left = (scalePin.offsetLeft - shift.x) + 'px';
+    var scaleLineWidth = scaleLine.offsetWidth;
+    var calculatedLeft = scalePin.offsetLeft - shift.x;
+    calculatedLeft = (calculatedLeft > scaleLineWidth) ? scaleLineWidth : calculatedLeft;
+    calculatedLeft = (calculatedLeft < 0) ? 0 : calculatedLeft;
 
+    scalePin.style.left = calculatedLeft + 'px';
 
-    var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
-    // высчитываем уровень насыщенности через пропорцию
     var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
-    scaleValue.value = scalePinLevel;
-    // обновляем фильтр большой картинки
+    setFilterLevel(scalePinLevel);
+
     var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
     applyImageFilter(selectedFilter.value);
-    setImgClass(imgUploadPreview, scalePinLevel);
-
+    setImgClass(imgUploadPreview, scalePinLevel, selectedFilter.value);
   };
 
   var onMouseUp = function () {
+
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
   };
