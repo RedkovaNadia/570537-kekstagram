@@ -48,7 +48,7 @@ var bigPictureElement = document.querySelector('.big-picture');
 var bigPictureCancel = bigPictureElement.querySelector('.big-picture__cancel');
 var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture__link');
 
-// ----------------------------------------------
+// ---------------------------------------------------------------------------------------------------
 // НАЧИНАЕМ РАБОТАТЬ С ОБРАБОТЧИКАМИ СОБЫТИЙ
 // ф-ция закрывает большую фотографию по нажатию esc на документа
 var onBigPictureEscPress = function (evt) {
@@ -138,13 +138,14 @@ var socialCommentLoadmoreClass = '.social__comment-loadmore';
 addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
 addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
 
-// -----------------------------------------
+// ---------------------------------------------------------------------------------------------------
 // Работаем с окном редактирования загруженного фото
 var uploadFileInput = document.querySelector('#upload-file');
 var imgUploadOverlay = document.querySelector('.img-upload__overlay');
 var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
 var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
 var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
+var imgUploadScale = document.querySelector('.img-upload__scale');
 
 // ф-ция-обработчик, которая закрывает окно редактирования по нажатию на esc
 // (и не закрывает, если инпут ввода хэш-тега или комментария в фокусе)
@@ -160,6 +161,7 @@ var onUploadOverlayEscPress = function (evt) {
 var onUploadFileInputChange = function () {
   imgUploadOverlay.classList.remove('hidden');
   document.addEventListener('keydown', onUploadOverlayEscPress);
+  imgUploadScale.classList.add('hidden');
 };
 
 // ф-ция закрывает окно редактирования загруженного фото и удаляет обработчик закрытия окна настройки по нажатия esc на документе
@@ -176,26 +178,83 @@ uploadFileInput.addEventListener('change', onUploadFileInputChange);
 // добавление обработчика закрытия окна редактирования фото на крестик окна редактирования
 imgUploadCancel.addEventListener('click', onImgUploadCancelClick);
 
+// ---------------------------------------------------------------------------------------------------
 // ---------------------- ЭФФЕКТЫ
 
 // добавляем эффекты на загруженное фото
 var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
 var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
+var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
+var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
+var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
+var scaleLevel = scaleLine.querySelector('.scale__level'); // линия уровня (тянется за ползунком)
 var prevClass = 'effects__preview--none';
 
-// ф-ция, которая добавляет класс картинке в зависимости от выбранного фильтра
+// принимает уровень эффекта - берет его из поля
+var getFilterLevel = function () {
+  return parseInt(scaleValue.value, 10);
+};
+
+// задает полю число, задает пину смещение, задает длину слайдера (линии)
+var setFilterLevel = function (number) {
+  scaleValue.value = number;
+  scalePin.style.left = number + '%';
+  scaleLevel.style.width = number + '%';
+};
+
+// задает ффильтр картинке в стилях - принимает на вход блок картинки, уровень насыщенности, выбранную радиокнопку
+var setImgFilter = function (img, level, selected) {
+  var effectFilter;
+
+  switch (selected) {
+    case 'chrome':
+      effectFilter = 'grayscale(' + (level / 100) + ')';
+      break;
+
+    case 'sepia':
+      effectFilter = 'sepia(' + (level / 100) + ')';
+      break;
+
+    case 'marvin':
+      effectFilter = 'invert(' + level + '%)';
+      break;
+
+    case 'phobos':
+      effectFilter = 'blur(' + (3 * level / 100) + 'px)';
+      break;
+
+    case 'heat':
+      var levelEffect = (3 * level / 100) || 1;
+      effectFilter = 'brightness(' + levelEffect + ')';
+      break;
+      // фрагмент кода выполняется при отсутствии
+      // совпадений со значениями представленных вариантов
+    default:
+      effectFilter = 'none';
+      break;
+  }
+  img.style.filter = effectFilter;
+};
+
+// ф-ция, которая добавляет класс картинке в зависимости от выбранного эффекта
 var applyImageFilter = function (selected) {
+  // определяем новый класс в зависимости от выбранной радиокнопки эффекта
   var newClass = 'effects__preview--' + selected;
 
-  // добавляем картинке новый класс
+  // добавляем картинке новый класс - удаляем предыдущий
   imgUploadPreview.classList.add(newClass);
   imgUploadPreview.classList.remove(prevClass);
+  // вызываем ф-цию, задающей фильтр картинке в стилях
+  setImgFilter(imgUploadPreview, getFilterLevel(), selected);
 
   prevClass = newClass;
 };
 
 // обработчик, добавляющий эффекты (добавлением соответствующего класса картинке)
 var onEffectRadioElementClick = function (evt) {
+  // нижняя строка нужна при обработчике события ДВИЖЕНИЯ мыши
+  // setFilterLevel(100);
+  // добавляет картинке фильтр в зависимости от выбранной радиокнопки
   applyImageFilter(evt.target.value);
   if (imgUploadPreview.classList.contains('effects__preview--none')) {
     imgUploadScale.classList.add('hidden');
@@ -204,11 +263,12 @@ var onEffectRadioElementClick = function (evt) {
   }
 };
 
-// циклом вешаем обработчики на все элементы
+// вешаем обработчики на все элементы
+
 [].forEach.call(effectsRadioElements, function (filter) {
   filter.addEventListener('click', onEffectRadioElementClick);
 });
-
+// ---------------------------------------------------------------------------------------------------
 // -------------------------------- Работаем с масштабом загруженного фото
 var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
 var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
@@ -246,51 +306,69 @@ var onResizeMinusButtonClick = function () {
 resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
 resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
-// ------------------------------------------------ Работаем с ползунком -- для начала вводим все нужные переменные
-
-var imgUploadScale = document.querySelector('.img-upload__scale');
-var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
-var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
-var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
-
-var setImgClass = function (img, level) {
-  var effectFilter;
-
-  switch (img.className) {
-    case 'effects__preview--chrome':
-      effectFilter = 'grayscale(' + (level / 100) + ')';
-      break;
-
-    case 'effects__preview--sepia':
-      effectFilter = 'sepia(' + (level / 100) + ')';
-      break;
-
-    case 'effects__preview--marvin':
-      effectFilter = 'invert(' + level + ')';
-      break;
-
-    case 'effects__preview--phobos':
-      effectFilter = 'blur(' + (3 * level / 100) + 'px)';
-      break;
-
-    case 'effects__preview--heat':
-      effectFilter = 'brightness(' + (level) + '%)';
-      break;
-  }
-  imgUploadPreview.style.filter = effectFilter;
-};
-
+// ---------------------------------------------------------------------------------------------------
+// ------------------------------------------------ Работаем с ползунком
 
 // вешаем обработчик отпаускания мыши на пин слайдреа
 scalePin.addEventListener('mouseup', function () {
   var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
   // высчитываем уровень насыщенности через пропорцию
   var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
-  scaleValue.value = scalePinLevel;
-  // console.log(scaleLineWidth, scalePin.offsetLeft, scalePinLevel, scaleValue.value);
+  setFilterLevel(scalePinLevel);
   // обновляем фильтр большой картинки
   var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
   applyImageFilter(selectedFilter.value);
-  setImgClass(imgUploadPreview, scalePinLevel);
-  // console.log(imgUploadPreview.style.filter);
+  setImgFilter(imgUploadPreview, scalePinLevel, selectedFilter.value);
 });
+
+setFilterLevel(100);
+
+// ---------------------------------------------------------------------------------------------------
+// form.js — модуль, который работает с формой редактирования изображения
+// Валидация - работа с хештегами
+var TAG_MAX_LENGTH = 20;
+var TAG_MIN_LENGTH = 2;
+var TAGS_MAX_QUANTITY = 5;
+
+hashtagInput.addEventListener('input', function () {
+  var hashtagsString = hashtagInput.value.trim();
+  var hashtags = hashtagsString.split(' ');
+  var correct = true;
+
+  if (hashtags.length > 0) {
+    for (i = 0; i < hashtags.length; i++) {
+      if (hashtags[i].length > TAG_MAX_LENGTH) {
+        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
+        correct = false;
+      }
+      if (hashtags[i].length < TAG_MIN_LENGTH) {
+        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
+        correct = false;
+      }
+      if (hashtags[i] === '#') {
+        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+        correct = false;
+      }
+      if (hashtags.length > TAGS_MAX_QUANTITY) {
+        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
+        correct = false;
+      }
+      // создаем новый массив и добавляем в него повторяющеся элементы из исходного массива хэш-тегов -
+      // - на каждой итерации в новый массив записыватся повторения одного и того же хештега
+      var newArr = [];
+      hashtags.forEach(function (item) {
+        if (item === hashtags[i]) {
+          newArr.push(item);
+        }
+      });
+      if (newArr.length > 1) {
+        hashtagInput.setCustomValidity('Хеш-тэги не должны повторяться');
+        correct = false;
+      }
+      if (correct) {
+        hashtagInput.setCustomValidity('');
+      }
+    }
+  }
+});
+
