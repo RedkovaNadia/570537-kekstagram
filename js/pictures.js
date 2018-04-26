@@ -253,7 +253,7 @@ var applyImageFilter = function (selected) {
 // обработчик, добавляющий эффекты (добавлением соответствующего класса картинке)
 var onEffectRadioElementClick = function (evt) {
   // нижняя строка нужна при обработчике события ДВИЖЕНИЯ мыши
-  // setFilterLevel(100);
+  setFilterLevel(100);
   // добавляет картинке фильтр в зависимости от выбранной радиокнопки
   applyImageFilter(evt.target.value);
   if (imgUploadPreview.classList.contains('effects__preview--none')) {
@@ -308,7 +308,7 @@ resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
 // ---------------------------------------------------------------------------------------------------
 // ------------------------------------------------ Работаем с ползунком
-
+/*
 // вешаем обработчик отпаускания мыши на пин слайдреа
 scalePin.addEventListener('mouseup', function () {
   var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
@@ -322,6 +322,7 @@ scalePin.addEventListener('mouseup', function () {
 });
 
 setFilterLevel(100);
+*/
 
 // ---------------------------------------------------------------------------------------------------
 // form.js — модуль, который работает с формой редактирования изображения
@@ -372,3 +373,49 @@ hashtagInput.addEventListener('input', function () {
   }
 });
 
+// ---------------------------------------------------------------------------------------------------
+// Движение пина
+
+scalePin.addEventListener('mousedown', function (evt) {
+
+  // получаем стартовые координаты курсора
+  var startCoords = {
+    x: evt.clientX
+  };
+
+  var onMouseMove = function (moveEvt) {
+    // вычисляем расстояние, на которое сместился курсор мыши
+    var shift = {
+      x: startCoords.x - moveEvt.clientX
+    };
+    // переписываем 'точку отсчета' - она каждый раз меняется
+    startCoords = {
+      x: moveEvt.clientX
+    };
+
+    // в координаты пина записываем новые координаты
+    var scaleLineWidth = scaleLine.offsetWidth;
+    var calculatedLeft = scalePin.offsetLeft - shift.x;
+    calculatedLeft = (calculatedLeft > scaleLineWidth) ? scaleLineWidth : calculatedLeft;
+    calculatedLeft = (calculatedLeft < 0) ? 0 : calculatedLeft;
+    // задаем положение пина (нужны только x-координаты)
+    scalePin.style.left = calculatedLeft + 'px';
+    // вычисляем уровень насыщенности эффекта
+    var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
+    setFilterLevel(scalePinLevel);
+    var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
+    applyImageFilter(selectedFilter.value);
+    setImgFilter(imgUploadPreview, scalePinLevel, selectedFilter.value);
+  };
+
+  var onMouseUp = function () {
+    var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
+    applyImageFilter(selectedFilter.value);
+    setImgFilter(imgUploadPreview, getFilterLevel(), selectedFilter.value);
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
