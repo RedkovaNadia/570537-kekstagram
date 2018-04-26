@@ -395,9 +395,6 @@ scalePin.addEventListener('mousedown', function (evt) {
 
     // в координаты пина записываем новые координаты
     var scaleLineWidth = scaleLine.offsetWidth;
-    // var scalePinWidth = scalePin.offsetWidth;
-    // console.log(scalePinWidth, scalePin.offsetLeft, scalePin.offsetLeft + scalePinWidth, shift.x);
-    // var calculatedLeft = (scalePin.offsetLeft + scalePinWidth / 2) - shift.x;
     var calculatedLeft = scalePin.offsetLeft - shift.x;
     calculatedLeft = (calculatedLeft > scaleLineWidth) ? scaleLineWidth : calculatedLeft;
     calculatedLeft = (calculatedLeft < 0) ? 0 : calculatedLeft;
