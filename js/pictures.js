@@ -48,7 +48,7 @@ var bigPictureElement = document.querySelector('.big-picture');
 var bigPictureCancel = bigPictureElement.querySelector('.big-picture__cancel');
 var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture__link');
 
-// ----------------------------------------------
+// ---------------------------------------------------------------------------------------------------
 // НАЧИНАЕМ РАБОТАТЬ С ОБРАБОТЧИКАМИ СОБЫТИЙ
 // ф-ция закрывает большую фотографию по нажатию esc на документа
 var onBigPictureEscPress = function (evt) {
@@ -138,7 +138,7 @@ var socialCommentLoadmoreClass = '.social__comment-loadmore';
 addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
 addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
 
-// -----------------------------------------
+// ---------------------------------------------------------------------------------------------------
 // Работаем с окном редактирования загруженного фото
 var uploadFileInput = document.querySelector('#upload-file');
 var imgUploadOverlay = document.querySelector('.img-upload__overlay');
@@ -178,6 +178,7 @@ uploadFileInput.addEventListener('change', onUploadFileInputChange);
 // добавление обработчика закрытия окна редактирования фото на крестик окна редактирования
 imgUploadCancel.addEventListener('click', onImgUploadCancelClick);
 
+// ---------------------------------------------------------------------------------------------------
 // ---------------------- ЭФФЕКТЫ
 
 // добавляем эффекты на загруженное фото
@@ -185,21 +186,24 @@ var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
 var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
 var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
 var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
-var prevClass = 'effects__preview--none';
 var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
-var scaleLevel = scaleLine.querySelector('.scale__level');
+var scaleLevel = scaleLine.querySelector('.scale__level'); // линия уровня (тянется за ползунком)
+var prevClass = 'effects__preview--none';
 
+// принимает уровень эффекта - берет его из поля
 var getFilterLevel = function () {
   return parseInt(scaleValue.value, 10);
 };
 
+// задает полю число, задает пину смещение, задает длину слайдера (линии)
 var setFilterLevel = function (number) {
   scaleValue.value = number;
   scalePin.style.left = number + '%';
   scaleLevel.style.width = number + '%';
 };
 
-var setImgClass = function (img, level, selected) {
+// задает ффильтр картинке в стилях - принимает на вход блок картинки, уровень насыщенности, выбранную радиокнопку
+var setImgFilter = function (img, level, selected) {
   var effectFilter;
 
   switch (selected) {
@@ -212,7 +216,7 @@ var setImgClass = function (img, level, selected) {
       break;
 
     case 'marvin':
-      effectFilter = 'invert(' + level + ')';
+      effectFilter = 'invert(' + level + '%)';
       break;
 
     case 'phobos':
@@ -220,27 +224,37 @@ var setImgClass = function (img, level, selected) {
       break;
 
     case 'heat':
-      effectFilter = 'brightness(' + (level) + '%)';
+      var levelEffect = (3 * level / 100) || 1;
+      effectFilter = 'brightness(' + levelEffect + ')';
+      break;
+      // фрагмент кода выполняется при отсутствии
+      // совпадений со значениями представленных вариантов
+    default:
+      effectFilter = 'none';
       break;
   }
   img.style.filter = effectFilter;
 };
 
-// ф-ция, которая добавляет класс картинке в зависимости от выбранного фильтра
+// ф-ция, которая добавляет класс картинке в зависимости от выбранного эффекта
 var applyImageFilter = function (selected) {
+  // определяем новый класс в зависимости от выбранной радиокнопки эффекта
   var newClass = 'effects__preview--' + selected;
 
-  // добавляем картинке новый класс
+  // добавляем картинке новый класс - удаляем предыдущий
   imgUploadPreview.classList.add(newClass);
   imgUploadPreview.classList.remove(prevClass);
-
-  setImgClass(imgUploadPreview, getFilterLevel(), selected);
+  // вызываем ф-цию, задающей фильтр картинке в стилях
+  setImgFilter(imgUploadPreview, getFilterLevel(), selected);
 
   prevClass = newClass;
 };
 
 // обработчик, добавляющий эффекты (добавлением соответствующего класса картинке)
 var onEffectRadioElementClick = function (evt) {
+  // нижняя строка нужна при обработчике события ДВИЖЕНИЯ мыши
+  // setFilterLevel(100);
+  // добавляет картинке фильтр в зависимости от выбранной радиокнопки
   applyImageFilter(evt.target.value);
   if (imgUploadPreview.classList.contains('effects__preview--none')) {
     imgUploadScale.classList.add('hidden');
@@ -249,11 +263,12 @@ var onEffectRadioElementClick = function (evt) {
   }
 };
 
-// циклом вешаем обработчики на все элементы
+// вешаем обработчики на все элементы
+
 [].forEach.call(effectsRadioElements, function (filter) {
   filter.addEventListener('click', onEffectRadioElementClick);
 });
-
+// ---------------------------------------------------------------------------------------------------
 // -------------------------------- Работаем с масштабом загруженного фото
 var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
 var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
@@ -291,7 +306,8 @@ var onResizeMinusButtonClick = function () {
 resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
 resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
-// ------------------------------------------------ Работаем с ползунком -- для начала вводим все нужные переменные
+// ---------------------------------------------------------------------------------------------------
+// ------------------------------------------------ Работаем с ползунком
 
 // вешаем обработчик отпаускания мыши на пин слайдреа
 scalePin.addEventListener('mouseup', function () {
@@ -302,12 +318,13 @@ scalePin.addEventListener('mouseup', function () {
   // обновляем фильтр большой картинки
   var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
   applyImageFilter(selectedFilter.value);
-  setImgClass(imgUploadPreview, scalePinLevel, selectedFilter.value);
+  setImgFilter(imgUploadPreview, scalePinLevel, selectedFilter.value);
 });
 
 setFilterLevel(100);
 
-// --------------------------------------------
+// ---------------------------------------------------------------------------------------------------
+// form.js — модуль, который работает с формой редактирования изображения
 // Валидация - работа с хештегами
 var TAG_MAX_LENGTH = 20;
 var TAG_MIN_LENGTH = 2;
@@ -355,8 +372,10 @@ hashtagInput.addEventListener('input', function () {
   }
 });
 
-// ----------------------------------------------------- Движение пина
 /*
+// ---------------------------------------------------------------------------------------------------
+// Движение пина
+
 scalePin.addEventListener('mousedown', function (evt) {
 
   // получаем стартовые координаты курсора
@@ -373,24 +392,29 @@ scalePin.addEventListener('mousedown', function (evt) {
     startCoords = {
       x: moveEvt.clientX
     };
+
     // в координаты пина записываем новые координаты
     var scaleLineWidth = scaleLine.offsetWidth;
+    // var scalePinWidth = scalePin.offsetWidth;
+    // console.log(scalePinWidth, scalePin.offsetLeft, scalePin.offsetLeft + scalePinWidth, shift.x);
+    // var calculatedLeft = (scalePin.offsetLeft + scalePinWidth / 2) - shift.x;
     var calculatedLeft = scalePin.offsetLeft - shift.x;
     calculatedLeft = (calculatedLeft > scaleLineWidth) ? scaleLineWidth : calculatedLeft;
     calculatedLeft = (calculatedLeft < 0) ? 0 : calculatedLeft;
-
+    // задаем положение пина (нужны только x-координаты)
     scalePin.style.left = calculatedLeft + 'px';
-
+    // вычисляем уровень насыщенности эффекта
     var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
     setFilterLevel(scalePinLevel);
-
     var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
     applyImageFilter(selectedFilter.value);
-    setImgClass(imgUploadPreview, scalePinLevel, selectedFilter.value);
+    setImgFilter(imgUploadPreview, scalePinLevel, selectedFilter.value);
   };
 
   var onMouseUp = function () {
-
+    var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
+    applyImageFilter(selectedFilter.value);
+    setImgFilter(imgUploadPreview, getFilterLevel(), selectedFilter.value);
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
   };
