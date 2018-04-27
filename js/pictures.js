@@ -1,48 +1,6 @@
 'use strict';
 
-var NUMBER_OF_PHOTOS = 25;
-var COMMENTS = ['Всё отлично!', 'В целом всё неплохо. Но не всё.', 'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
-  'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.', 'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.', 'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'];
-var DESCRIPTIONS = ['Тестим новую камеру!', 'Затусили с друзьями на море', 'Как же круто тут кормят', 'Отдыхаем...', 'Цените каждое мгновенье. Цените тех, кто рядом с вами и отгоняйте все сомненья. Не обижайте всех словами......', 'Вот это тачка!'];
 var ESC_KEYCODE = 27;
-
-// ф-ция, определяющая рандомное значение в заданном диапазоне чисел
-var getRandomNumber = function (min, max) {
-  return min + Math.random() * (max - min);
-};
-
-// функция, возвращающая рандомный индекс массива
-var getRandomIndex = function (array) {
-  return Math.round(getRandomNumber(0, (array.length - 1)));
-};
-
-var shuffleArray = function (array) { // ф-ция, которая мешает массив
-  var arrayCopy = array.slice();
-  var mixedArray = [];
-  while (mixedArray.length < array.length) {
-    var randomIndex = getRandomIndex(arrayCopy);
-    mixedArray.push(arrayCopy[randomIndex]);
-    arrayCopy.splice(randomIndex, 1);
-  }
-  return mixedArray;
-};
-
-// создаю объект фотографии
-var getPhotoObject = function (index) {
-  var commentsArrayShuffleCopy = shuffleArray(COMMENTS);
-  commentsArrayShuffleCopy.splice(1, COMMENTS.length);
-  return {
-    'url': 'photos/' + (index + 1) + '.jpg',
-    'likes': Math.round(getRandomNumber(15, 200)),
-    'comments': commentsArrayShuffleCopy,
-    'description': DESCRIPTIONS[getRandomIndex(DESCRIPTIONS)]
-  };
-};
-// генерирую массив из 25 объектов-фотографий
-var photos = [];
-for (var i = 0; i < NUMBER_OF_PHOTOS; i++) {
-  photos.push(getPhotoObject(i));
-}
 
 var bigPictureElement = document.querySelector('.big-picture');
 var bigPictureCancel = bigPictureElement.querySelector('.big-picture__cancel');
@@ -69,6 +27,7 @@ var onBigPictureCancelClick = function () {
   document.removeEventListener('keydown', onBigPictureEscPress);
 };
 
+// СОЗДАНИЕ DOM-элемента (ЭЛЕМЕНТ ФОТОГРАФИИ, МИНИАТЮРА)
 // На основе данных объектов массива и шаблона создаю DOM-элементы, соответствующие фотографиям и заполняю их данными из массива
 var createPhotoElement = function (object) {
   // нахожу нужный шаблон и клонирую его
@@ -89,25 +48,26 @@ var createPhotoElement = function (object) {
 
 // добавление обработчика закрытия большого фото по клику на крестик элемента
 bigPictureCancel.addEventListener('click', onBigPictureCancelClick);
-
+// ---------------
+// НА ОСНОВАНИИ ДАННЫХ МАССИВА И Ф-ЦИИ СОЗДАНИЯ ФОТО ВТСАВКА КАЖДОЙ ИЗ ФРАГМЕНТА В ДОМ (25 МИНИАТЮР)
 // добиваюсь нужного мне количества фотографий при помощи ф-ции с циклом внутри, вставляю каждую во фрагмент и далее - в DOM
 var picturesBlock = document.querySelector('.pictures');
 var documentFragment = document.createDocumentFragment();
 
 var renderPhotos = function () {
-  for (i = 0; i < photos.length; i++) {
-    documentFragment.appendChild(createPhotoElement(photos[i]));
+  for (var i = 0; i < window.data.photos.length; i++) {
+    documentFragment.appendChild(createPhotoElement(window.data.photos[i]));
   }
   picturesBlock.appendChild(documentFragment);
 };
 renderPhotos();
-
+// ----------------
 // bigPictureElement.classList.remove('hidden');
 
 var socialComments = bigPictureElement.querySelector('.social__comments');
 var socialComment = socialComments.querySelectorAll('.social__comment');
 
-// ф-ция заполнения элемента фотографии данными
+// ЗАПОЛНЕНИЕ ЭЛЕМЕНТА БОЛЬШОЙ ФОТОГРАФИИ ДАННЫМИ ИЗ МАССИВА
 var renderBigPicture = function (object) {
   bigPictureElement.querySelector('img').src = object.url;
   bigPictureElement.querySelector('.likes-count').textContent = object.likes;
@@ -117,7 +77,7 @@ var renderBigPicture = function (object) {
   var imgElement = document.createElement('img');
   var spanElement = document.createElement('span');
   imgElement.className = 'social__picture';
-  imgElement.src = 'img/avatar-' + Math.round(getRandomNumber(1, 6)) + '.svg';
+  imgElement.src = 'img/avatar-' + Math.round(window.util.getRandomNumber(1, 6)) + '.svg';
   imgElement.width = 35;
   imgElement.height = 35;
   spanElement.textContent = object.comments;
@@ -139,7 +99,7 @@ addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
 addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
 
 // ---------------------------------------------------------------------------------------------------
-// Работаем с окном редактирования загруженного фото
+// form.js — модуль, который работает с формой редактирования изображения
 var uploadFileInput = document.querySelector('#upload-file');
 var imgUploadOverlay = document.querySelector('.img-upload__overlay');
 var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
@@ -307,73 +267,6 @@ resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
 resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
 // ---------------------------------------------------------------------------------------------------
-// ------------------------------------------------ Работаем с ползунком
-/*
-// вешаем обработчик отпаускания мыши на пин слайдреа
-scalePin.addEventListener('mouseup', function () {
-  var scaleLineWidth = scaleLine.offsetWidth; // находим ширину блока слайдера
-  // высчитываем уровень насыщенности через пропорцию
-  var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
-  setFilterLevel(scalePinLevel);
-  // обновляем фильтр большой картинки
-  var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
-  applyImageFilter(selectedFilter.value);
-  setImgFilter(imgUploadPreview, scalePinLevel, selectedFilter.value);
-});
-
-setFilterLevel(100);
-*/
-
-// ---------------------------------------------------------------------------------------------------
-// form.js — модуль, который работает с формой редактирования изображения
-// Валидация - работа с хештегами
-var TAG_MAX_LENGTH = 20;
-var TAG_MIN_LENGTH = 2;
-var TAGS_MAX_QUANTITY = 5;
-
-hashtagInput.addEventListener('input', function () {
-  var hashtagsString = hashtagInput.value.trim();
-  var hashtags = hashtagsString.split(' ');
-  var correct = true;
-
-  if (hashtags.length > 0) {
-    for (i = 0; i < hashtags.length; i++) {
-      if (hashtags[i].length > TAG_MAX_LENGTH) {
-        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
-        correct = false;
-      }
-      if (hashtags[i].length < TAG_MIN_LENGTH) {
-        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
-        correct = false;
-      }
-      if (hashtags[i] === '#') {
-        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
-        correct = false;
-      }
-      if (hashtags.length > TAGS_MAX_QUANTITY) {
-        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
-        correct = false;
-      }
-      // создаем новый массив и добавляем в него повторяющеся элементы из исходного массива хэш-тегов -
-      // - на каждой итерации в новый массив записыватся повторения одного и того же хештега
-      var newArr = [];
-      hashtags.forEach(function (item) {
-        if (item === hashtags[i]) {
-          newArr.push(item);
-        }
-      });
-      if (newArr.length > 1) {
-        hashtagInput.setCustomValidity('Хеш-тэги не должны повторяться');
-        correct = false;
-      }
-      if (correct) {
-        hashtagInput.setCustomValidity('');
-      }
-    }
-  }
-});
-
-// ---------------------------------------------------------------------------------------------------
 // Движение пина
 
 scalePin.addEventListener('mousedown', function (evt) {
@@ -418,4 +311,52 @@ scalePin.addEventListener('mousedown', function (evt) {
 
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mouseup', onMouseUp);
+});
+
+// ---------------------------------------------------------------------------------------------------
+// Валидация - работа с хештегами
+var TAG_MAX_LENGTH = 20;
+var TAG_MIN_LENGTH = 2;
+var TAGS_MAX_QUANTITY = 5;
+
+hashtagInput.addEventListener('input', function () {
+  var hashtagsString = hashtagInput.value.trim();
+  var hashtags = hashtagsString.split(' ');
+  var correct = true;
+
+  if (hashtags.length > 0) {
+    for (var i = 0; i < hashtags.length; i++) {
+      if (hashtags[i].length > TAG_MAX_LENGTH) {
+        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
+        correct = false;
+      }
+      if (hashtags[i].length < TAG_MIN_LENGTH) {
+        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
+        correct = false;
+      }
+      if (hashtags[i] === '#') {
+        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+        correct = false;
+      }
+      if (hashtags.length > TAGS_MAX_QUANTITY) {
+        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
+        correct = false;
+      }
+      // создаем новый массив и добавляем в него повторяющеся элементы из исходного массива хэш-тегов -
+      // - на каждой итерации в новый массив записыватся повторения одного и того же хештега
+      var newArr = [];
+      hashtags.forEach(function (item) {
+        if (item === hashtags[i]) {
+          newArr.push(item);
+        }
+      });
+      if (newArr.length > 1) {
+        hashtagInput.setCustomValidity('Хеш-тэги не должны повторяться');
+        correct = false;
+      }
+      if (correct) {
+        hashtagInput.setCustomValidity('');
+      }
+    }
+  }
 });
