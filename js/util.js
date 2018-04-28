@@ -1,5 +1,6 @@
 'use strict';
 (function () {
+  var ESC_KEYCODE = 27;
   // ф-ция, определяющая рандомное значение в заданном диапазоне чисел
   var getRandomNumber = function (min, max) {
     return min + Math.random() * (max - min);
@@ -20,9 +21,15 @@
     }
     return mixedArray;
   };
+  var isEscEvent = function (evt, action) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      action();
+    }
+  };
   window.util = {
-    getRandomNumber: getRandomNumber,
-    getRandomIndex: getRandomIndex,
-    shuffleArray: shuffleArray
+    getRandomNumber: getRandomNumber, // data, gallery
+    getRandomIndex: getRandomIndex, // data
+    shuffleArray: shuffleArray, // data
+    isEscEvent: isEscEvent // gallery, form
   };
 })();
