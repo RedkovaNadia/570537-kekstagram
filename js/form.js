@@ -12,6 +12,14 @@
   var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
 
+  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
+  var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
+  var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
+  var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
+  var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
+  var scaleLevel = scaleLine.querySelector('.scale__level'); // линия уровня (тянется за ползунком)
+  var prevClass = 'effects__preview--none';
+
   // ф-ция-обработчик, которая закрывает окно редактирования по нажатию на esc
   // (и не закрывает, если инпут ввода хэш-тега или комментария в фокусе)
   var onUploadOverlayEscPress = function (evt) {
@@ -21,8 +29,17 @@
       window.util.isEscEvent(evt, onImgUploadCancelClick);
     }
   };
+
+  var cleanImageFilters = function () {
+    imgUploadForm.reset();
+
+    applyImageFilter('effects__preview--none');
+    imageResize(100);
+  };
+
   // ф-ция открывает окно редактирования загруженного фото и добавляет обработчик закрытия окна настройки по нажатия esc на документе
   var onUploadFileInputChange = function () {
+    cleanImageFilters();
     imgUploadOverlay.classList.remove('hidden');
     document.addEventListener('keydown', onUploadOverlayEscPress);
     imgUploadScale.classList.add('hidden');
@@ -44,15 +61,7 @@
 
   // ---------------------------------------------------------------------------------------------------
   // ---------------------- ЭФФЕКТЫ
-
   // добавляем эффекты на загруженное фото
-  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
-  var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
-  var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
-  var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
-  var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
-  var scaleLevel = scaleLine.querySelector('.scale__level'); // линия уровня (тянется за ползунком)
-  var prevClass = 'effects__preview--none';
 
   // принимает уровень эффекта - берет его из поля
   var getFilterLevel = function () {
@@ -267,16 +276,5 @@
       }
     }
   });
-/*
-// работаем с отправкой данных - черновое
-imgUploadForm.addEventListener('submit', function (evt) {
-  window.uploadData(new FormData(imgUploadForm), function () {
-    // При успешной отправке формы, форма редактирования изображения закрывается,
-    // все данные, введённые в форму и контрол фильтра, приходят в исходное состояние.
-    // Поле загрузки фотографии, стилизованное под букву «О» в логотипе, очищается.
-  });
-  evt.preventDefault();
-});
-*/
 })();
 
