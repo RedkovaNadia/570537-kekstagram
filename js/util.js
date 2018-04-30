@@ -61,12 +61,18 @@
   };
 
   // ф-ция отправки данных
-  var uploadData = function (data, onLoad) {
+  var uploadData = function (data, onLoad, onError) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
-
     xhr.addEventListener('load', function () {
-      onLoad(xhr.response);
+      if (xhr.status === 200) {
+        onLoad(xhr.response);
+      } else {
+        onError('Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
+      }
+    });
+    xhr.addEventListener('error', function () {
+      onError('Произошла ошибка соединения');
     });
 
     xhr.open('POST', UPLOAD_URL);
@@ -80,3 +86,4 @@
   };
 })();
 */
+

@@ -1,24 +1,6 @@
 'use strict';
 
 (function () {
-  // ---------------
-  // НА ОСНОВАНИИ ДАННЫХ МАССИВА И Ф-ЦИИ СОЗДАНИЯ ФОТО ВТСТАВКА КАЖДОЙ ИЗ ФРАГМЕНТА В ДОМ (25 МИНИАТЮР)
-  var picturesBlock = document.querySelector('.pictures');
-  var documentFragment = document.createDocumentFragment();
-
-  var renderPhotos = function () {
-    // добиваюсь нужного мне количества фотографий при помощи ф-ции с циклом внутри, вставляю каждую во фрагмент и далее - в DOM
-    for (var i = 0; i < window.data.photos.length; i++) {
-      documentFragment.appendChild(window.picture.createPhotoElement(window.data.photos[i]));
-    }
-    picturesBlock.appendChild(documentFragment);
-  };
-  renderPhotos();
-})();
-
-// Прежний вариант gallery.js без деления на модули:
-/*
-(function () {
 
   var bigPictureElement = document.querySelector('.big-picture');
   var bigPictureCancel = bigPictureElement.querySelector('.big-picture__cancel');
@@ -54,42 +36,6 @@
   addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
   addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
 
-  // ---------------
-  // СОЗДАНИЕ DOM-элемента (ЭЛЕМЕНТ ФОТОГРАФИИ, МИНИАТЮРА)
-
-  // На основе данных объектов массива и шаблона создаю DOM-элементы, соответствующие фотографиям и заполняю их данными из массива
-  var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture__link');
-  var createPhotoElement = function (object) {
-    // нахожу нужный шаблон и клонирую его
-    var photoElement = pictureTemplate.cloneNode(true);
-
-    photoElement.querySelector('.picture__img').src = object.url;
-    photoElement.querySelector('.picture__stat--likes').textContent = object.likes;
-    photoElement.querySelector('.picture__stat--comments').textContent = object.comments.length;
-
-    // добавление обработчика открытия большого фото по клику на элемент
-    photoElement.addEventListener('click', function () {
-      renderBigPicture(object);
-      openBigPicture();
-    });
-
-    return photoElement;
-  };
-
-  // ---------------
-  // НА ОСНОВАНИИ ДАННЫХ МАССИВА И Ф-ЦИИ СОЗДАНИЯ ФОТО ВТСТАВКА КАЖДОЙ ИЗ ФРАГМЕНТА В ДОМ (25 МИНИАТЮР)
-  var picturesBlock = document.querySelector('.pictures');
-  var documentFragment = document.createDocumentFragment();
-
-  var renderPhotos = function () {
-    // добиваюсь нужного мне количества фотографий при помощи ф-ции с циклом внутри, вставляю каждую во фрагмент и далее - в DOM
-    for (var i = 0; i < window.data.photos.length; i++) {
-      documentFragment.appendChild(createPhotoElement(window.data.photos[i]));
-    }
-    picturesBlock.appendChild(documentFragment);
-  };
-  renderPhotos();
-
   // ---------------------------------------------------------------------------------------------------
   // НАЧИНАЕМ РАБОТАТЬ С ОБРАБОТЧИКАМИ СОБЫТИЙ
 
@@ -111,6 +57,9 @@
   };
   // добавление обработчика закрытия большого фото по клику на крестик элемента
   bigPictureCancel.addEventListener('click', onBigPictureCancelClick);
-})();
-*/
 
+  window.preview = {
+    renderBigPicture: renderBigPicture,
+    openBigPicture: openBigPicture
+  };
+})();
