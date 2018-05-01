@@ -14,7 +14,6 @@
     }
     picturesBlock.appendChild(documentFragment);
   };
-  renderPhotos();
 
   var onLoadSuccess = function (response) {
     photos = response.slice(0, NUMBER_OF_PHOTOS);
@@ -32,7 +31,8 @@
     node.textContent = errorMessage;
     document.body.insertAdjacentElement('afterbegin', node);
   };
-
+  // старый вызов - работал:
+  // window.backend.loadData(onLoadSuccess, onLoadError);
   window.backend.getServerConnection(onLoadSuccess, onLoadError, 'GET', window.backend.LOAD_URL);
 })();
 
