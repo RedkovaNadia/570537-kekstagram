@@ -39,7 +39,6 @@
 
   // ф-ция открывает окно редактирования загруженного фото и добавляет обработчик закрытия окна настройки по нажатия esc на документе
   var onUploadFileInputChange = function () {
-    cleanImageFilters();
     imgUploadOverlay.classList.remove('hidden');
     document.addEventListener('keydown', onUploadOverlayEscPress);
     imgUploadScale.classList.add('hidden');
@@ -47,6 +46,7 @@
 
     // ф-ция закрывает окно редактирования загруженного фото и удаляет обработчик закрытия окна настройки по нажатия esc на документе
   var onImgUploadCancelClick = function () {
+    cleanImageFilters();
     imgUploadOverlay.classList.add('hidden');
     // сбрасываем значение инпута загрузки, чтобы было возможно загружать одно фото повторно
     uploadFileInput.value = null;
