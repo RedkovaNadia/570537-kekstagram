@@ -1,3 +1,4 @@
+/*
 'use strict';
 (function () {
   var NUMBER_OF_PHOTOS = 25;
@@ -28,4 +29,5 @@
     photos: getObjectsArray()
   };
 })();
+*/
 

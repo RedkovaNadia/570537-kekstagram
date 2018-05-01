@@ -276,5 +276,22 @@
       }
     }
   });
+  // работаем с отправкой данных - черновое
+  var bigPictureElement = document.querySelector('.big-picture');
+  var messageError = imgUploadForm.querySelector('.img-upload__message--error');
+  var onUploadError = function () {
+    messageError.classList.remove('hidden');
+  };
+
+  imgUploadForm.addEventListener('submit', function (evt) {
+    // При успешной отправке формы, форма редактирования изображения закрывается,
+    // все данные, введённые в форму и контрол фильтра, приходят в исходное состояние.
+    // Поле загрузки фотографии, стилизованное под букву «О» в логотипе, очищается.
+    window.getServerConnection(new FormData(imgUploadForm), function () {
+      bigPictureElement.classList.add('hidden');
+      cleanImageFilters();
+    }, onUploadError, 'POST', window.backend.UPLOAD_URL);
+    evt.preventDefault();
+  });
 })();
 
