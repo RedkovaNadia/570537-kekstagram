@@ -31,10 +31,10 @@
     node.textContent = errorMessage;
     document.body.insertAdjacentElement('afterbegin', node);
   };
-  // старый вызов - работал:
-  // window.backend.loadData(onLoadSuccess, onLoadError);
-  window.backend.getServerConnection(onLoadSuccess, onLoadError, 'GET', window.backend.LOAD_URL);
+
+  window.backend.loadData(onLoadSuccess, onLoadError);
 })();
+
 
 // старый вариант этого модуля
 /*

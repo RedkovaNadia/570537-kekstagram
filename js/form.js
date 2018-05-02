@@ -11,6 +11,8 @@
   var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
   var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
+  var bigPictureElement = document.querySelector('.big-picture'); // повторяется в 2 модулях - убрать
+  var messageError = imgUploadForm.querySelector('.img-upload__message--error');
 
   var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
   var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
@@ -276,21 +278,20 @@
       }
     }
   });
-  // работаем с отправкой данных - черновое
-  var bigPictureElement = document.querySelector('.big-picture');
-  var messageError = imgUploadForm.querySelector('.img-upload__message--error');
+  // работаем с отправкой данных
   var onUploadError = function () {
     messageError.classList.remove('hidden');
   };
 
+  // При успешной отправке формы, форма редактирования изображения закрывается,
+  // все данные, введённые в форму и контрол фильтра, приходят в исходное состояние.
+  // Поле загрузки фотографии, стилизованное под букву «О» в логотипе, очищается.
   imgUploadForm.addEventListener('submit', function (evt) {
-    // При успешной отправке формы, форма редактирования изображения закрывается,
-    // все данные, введённые в форму и контрол фильтра, приходят в исходное состояние.
-    // Поле загрузки фотографии, стилизованное под букву «О» в логотипе, очищается.
-    window.getServerConnection(new FormData(imgUploadForm), function () {
+    window.uploadData(function () {
       bigPictureElement.classList.add('hidden');
       cleanImageFilters();
-    }, onUploadError, 'POST', window.backend.UPLOAD_URL);
+      // console.log('upload');
+    }, onUploadError, new FormData(imgUploadForm));
     evt.preventDefault();
   });
 })();
