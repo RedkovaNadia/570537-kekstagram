@@ -37,7 +37,6 @@
   addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
   addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
 
-  // ---------------------------------------------------------------------------------------------------
   // НАЧИНАЕМ РАБОТАТЬ С ОБРАБОТЧИКАМИ СОБЫТИЙ
 
   // ф-ция открывает большое фото удалением у блока класса hidden

@@ -279,21 +279,18 @@
       }
     }
   });
-  // работаем с отправкой данных
+  // ------------------------------------------------работаем с отправкой данных
+
   var onUploadError = function () {
     messageError.classList.remove('hidden');
   };
 
-  // При успешной отправке формы, форма редактирования изображения закрывается,
-  // все данные, введённые в форму и контрол фильтра, приходят в исходное состояние.
-  // Поле загрузки фотографии, стилизованное под букву «О» в логотипе, очищается.
   imgUploadForm.addEventListener('submit', function (evt) {
-    window.uploadData(function () {
-      bigPictureElement.classList.add('hidden');
-      cleanImageFilters();
-      // console.log('upload');
-    }, onUploadError, new FormData(imgUploadForm));
     evt.preventDefault();
+    window.backend.uploadData(function () {
+      imgUploadOverlay.classList.add('hidden');
+      cleanImageFilters();
+    }, onUploadError, new FormData(imgUploadForm));
   });
 })();
 
