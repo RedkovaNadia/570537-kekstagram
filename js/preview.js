@@ -13,18 +13,22 @@
     bigPictureElement.querySelector('img').src = object.url;
     bigPictureElement.querySelector('.likes-count').textContent = object.likes;
     bigPictureElement.querySelector('.comments-count').textContent = object.comments.length;
-    // bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
+    socialComment[0].classList.add('visually-hidden');
     socialComment[1].classList.add('visually-hidden');
-    socialComment[0].innerHTML = '';
-    var imgElement = document.createElement('img');
-    var spanElement = document.createElement('span');
-    imgElement.className = 'social__picture';
-    imgElement.src = 'img/avatar-' + Math.round(window.util.getRandomNumber(1, 6)) + '.svg';
-    imgElement.width = 35;
-    imgElement.height = 35;
-    spanElement.textContent = object.comments;
-    socialComment[0].appendChild(imgElement);
-    socialComment[0].appendChild(spanElement);
+    var documentFragment = document.createDocumentFragment();
+    for (var i = 0; i < object.comments.length; i++) {
+      var imgElement = document.createElement('img');
+      var spanElement = document.createElement('span');
+      imgElement.className = 'social__picture';
+      imgElement.src = 'img/avatar-' + Math.round(window.util.getRandomNumber(1, 6)) + '.svg';
+      imgElement.width = 35;
+      imgElement.height = 35;
+      spanElement.textContent = object.comments[i];
+      spanElement.appendChild(imgElement);
+      documentFragment.appendChild(spanElement);
+    }
+    socialComments.appendChild(documentFragment);
+    bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
   };
 
   // Прячу блоки счётчика комментариев и загрузки новых комментариев
