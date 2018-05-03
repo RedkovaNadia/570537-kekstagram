@@ -5,6 +5,7 @@
   var photos = [];
   var NUMBER_OF_PHOTOS = 25;
   var picturesBlock = document.querySelector('.pictures');
+  var filtersContainer = document.querySelector('.img-filters ');
   var documentFragment = document.createDocumentFragment();
 
   var renderPhotos = function () {
@@ -18,6 +19,7 @@
   var onLoadSuccess = function (response) {
     photos = response.slice(0, NUMBER_OF_PHOTOS);
     renderPhotos();
+    filtersContainer.classList.remove('img-filters--inactive');
   };
 
   var onLoadError = function (errorMessage) {

@@ -138,7 +138,8 @@
     }
   };
 
-    // вешаем обработчики на все элементы
+    // вешаем обработчики на все элементы - создаем псевдомассив(?) и на каждый из элементов псевдомассива кнопок
+    // навешиваем обработчик (?)
 
   [].forEach.call(effectsRadioElements, function (filter) {
     filter.addEventListener('click', onEffectRadioElementClick);
