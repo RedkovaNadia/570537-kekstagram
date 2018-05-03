@@ -11,6 +11,7 @@
   var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
   var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
+  var messageError = imgUploadForm.querySelector('.img-upload__message--error');
 
   var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
   var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
@@ -136,7 +137,8 @@
     }
   };
 
-    // вешаем обработчики на все элементы
+    // вешаем обработчики на все элементы - создаем псевдомассив(?) и на каждый из элементов псевдомассива кнопок
+    // навешиваем обработчик (?)
 
   [].forEach.call(effectsRadioElements, function (filter) {
     filter.addEventListener('click', onEffectRadioElementClick);
@@ -275,6 +277,19 @@
         }
       }
     }
+  });
+  // ------------------------------------------------работаем с отправкой данных
+
+  var onUploadError = function () {
+    messageError.classList.remove('hidden');
+  };
+
+  imgUploadForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.uploadData(function () {
+      imgUploadOverlay.classList.add('hidden');
+      cleanImageFilters();
+    }, onUploadError, new FormData(imgUploadForm));
   });
 })();
 

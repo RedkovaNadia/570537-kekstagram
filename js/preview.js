@@ -13,6 +13,7 @@
     bigPictureElement.querySelector('img').src = object.url;
     bigPictureElement.querySelector('.likes-count').textContent = object.likes;
     bigPictureElement.querySelector('.comments-count').textContent = object.comments.length;
+    // bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
     socialComment[1].classList.add('visually-hidden');
     socialComment[0].innerHTML = '';
     var imgElement = document.createElement('img');
@@ -36,7 +37,6 @@
   addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
   addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
 
-  // ---------------------------------------------------------------------------------------------------
   // НАЧИНАЕМ РАБОТАТЬ С ОБРАБОТЧИКАМИ СОБЫТИЙ
 
   // ф-ция открывает большое фото удалением у блока класса hidden
