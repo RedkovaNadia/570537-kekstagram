@@ -11,7 +11,6 @@
   var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
   var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
-  var bigPictureElement = document.querySelector('.big-picture'); // повторяется в 2 модулях - убрать
   var messageError = imgUploadForm.querySelector('.img-upload__message--error');
 
   var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
