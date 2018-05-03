@@ -4,8 +4,44 @@
 
   var bigPictureElement = document.querySelector('.big-picture');
   var bigPictureCancel = bigPictureElement.querySelector('.big-picture__cancel');
-
   var socialComments = bigPictureElement.querySelector('.social__comments');
+
+  var appendComment = function (text) {
+    var commentElement = document.createElement('li');
+    commentElement.classList.add('social__comment', 'social__comment--text');
+
+    var avatar = document.createElement('img');
+    avatar.classList.add('social__picture');
+    avatar.width = 35;
+    avatar.height = 35;
+    avatar.src = 'img/avatar-' + Math.round(window.util.getRandomNumber(1, 6)) + '.svg';
+
+    commentElement.appendChild(avatar);
+
+    var textElement = document.createTextNode(text);
+    commentElement.appendChild(textElement);
+
+    return commentElement;
+  };
+
+  // ЗАПОЛНЕНИЕ ЭЛЕМЕНТА БОЛЬШОЙ ФОТОГРАФИИ ДАННЫМИ ИЗ МАССИВА
+  var renderBigPicture = function (object) {
+    bigPictureElement.querySelector('img').src = object.url;
+    bigPictureElement.querySelector('.likes-count').textContent = object.likes;
+    bigPictureElement.querySelector('.comments-count').textContent = object.comments.length;
+
+    var documentFragment = document.createDocumentFragment();
+    socialComments.innerHTML = '';
+
+    object.comments.forEach(function (item) {
+      documentFragment.appendChild(appendComment(item));
+    });
+
+    socialComments.appendChild(documentFragment);
+    bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
+  };
+
+  /*
   var socialComment = socialComments.querySelectorAll('.social__comment');
 
   // ЗАПОЛНЕНИЕ ЭЛЕМЕНТА БОЛЬШОЙ ФОТОГРАФИИ ДАННЫМИ ИЗ МАССИВА
@@ -17,6 +53,7 @@
     socialComment[1].classList.add('visually-hidden');
     var documentFragment = document.createDocumentFragment();
     for (var i = 0; i < object.comments.length; i++) {
+      // social__comment social__comment--text
       var imgElement = document.createElement('img');
       var spanElement = document.createElement('span');
       imgElement.className = 'social__picture';
@@ -30,6 +67,7 @@
     socialComments.appendChild(documentFragment);
     bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
   };
+  */
 
   // Прячу блоки счётчика комментариев и загрузки новых комментариев
   var addVisuallyHiddenClass = function (element, selector) {
@@ -46,6 +84,7 @@
   // ф-ция открывает большое фото удалением у блока класса hidden
   var openBigPicture = function () {
     bigPictureElement.classList.remove('hidden');
+    document.querySelector('body').classList.add('modal-open');
     document.addEventListener('keydown', onBigPictureEscPress);
   };
 
