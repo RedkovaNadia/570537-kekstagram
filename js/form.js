@@ -241,7 +241,9 @@
     var hashtagsString = hashtagInput.value.trim();
     var hashtags = hashtagsString.split(' ');
     var correct = true;
-
+    // 3 там все нормально, я бы только вынес валидацию в отдельную функцию,
+    // убрал бы correct а вместо него расставил return,
+    // чтобы не было лишних проверок
     if (hashtags.length > 0) {
       for (var i = 0; i < hashtags.length; i++) {
         if (hashtags[i].length > TAG_MAX_LENGTH) {

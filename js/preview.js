@@ -41,34 +41,6 @@
     bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
   };
 
-  /*
-  var socialComment = socialComments.querySelectorAll('.social__comment');
-
-  // ЗАПОЛНЕНИЕ ЭЛЕМЕНТА БОЛЬШОЙ ФОТОГРАФИИ ДАННЫМИ ИЗ МАССИВА
-  var renderBigPicture = function (object) {
-    bigPictureElement.querySelector('img').src = object.url;
-    bigPictureElement.querySelector('.likes-count').textContent = object.likes;
-    bigPictureElement.querySelector('.comments-count').textContent = object.comments.length;
-    socialComment[0].classList.add('visually-hidden');
-    socialComment[1].classList.add('visually-hidden');
-    var documentFragment = document.createDocumentFragment();
-    for (var i = 0; i < object.comments.length; i++) {
-      // social__comment social__comment--text
-      var imgElement = document.createElement('img');
-      var spanElement = document.createElement('span');
-      imgElement.className = 'social__picture';
-      imgElement.src = 'img/avatar-' + Math.round(window.util.getRandomNumber(1, 6)) + '.svg';
-      imgElement.width = 35;
-      imgElement.height = 35;
-      spanElement.textContent = object.comments[i];
-      spanElement.appendChild(imgElement);
-      documentFragment.appendChild(spanElement);
-    }
-    socialComments.appendChild(documentFragment);
-    bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
-  };
-  */
-
   // Прячу блоки счётчика комментариев и загрузки новых комментариев
   var addVisuallyHiddenClass = function (element, selector) {
     element.querySelector(selector).classList.add('visually-hidden');
@@ -96,6 +68,7 @@
   // ф-ция закрывает большое фото длбавлением блоку класс hidden и удаляет обработчик закрытия фото по esc
   var onBigPictureCancelClick = function () {
     bigPictureElement.classList.add('hidden');
+    document.querySelector('body').classList.remove('modal-open');
     document.removeEventListener('keydown', onBigPictureEscPress);
   };
   // добавление обработчика закрытия большого фото по клику на крестик элемента

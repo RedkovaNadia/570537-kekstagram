@@ -6,20 +6,54 @@
   var NUMBER_OF_PHOTOS = 25;
   var picturesBlock = document.querySelector('.pictures');
   var filtersContainer = document.querySelector('.img-filters ');
+  var filtersButtons = filtersContainer.querySelectorAll('.img-filters__button');
   var documentFragment = document.createDocumentFragment();
 
   var renderPhotos = function () {
     // добиваюсь нужного мне количества фотографий при помощи ф-ции с циклом внутри, вставляю каждую во фрагмент и далее - в DOM
-    for (var i = 0; i < photos.length; i++) {
-      documentFragment.appendChild(window.picture.createPhotoElement(photos[i]));
-    }
+    photos.forEach(function (item) {
+      documentFragment.appendChild(window.picture.createPhotoElement(item));
+    });
     picturesBlock.appendChild(documentFragment);
+  };
+
+  var lastTimeout;
+  var onFiltersButtonClick = function (evt) {
+    var activeElement = evt.target;
+    activeElement.classList.add('img-filters__button--active');
+
+    switch (activeElement.id) {
+      case 'filter-popular':
+        photos = photos.sort(function (first, second) {
+          return second.likes - first.likes;
+        });
+        break;
+
+      case 'filter-discussed':
+        photos = photos.sort(function (first, second) {
+          return second.comments.length - first.comments.length;
+        });
+        break;
+
+      case 'filter-random':
+        photos = window.util.shuffleArray(photos);
+        break;
+    }
+    if (lastTimeout) {
+      window.clearTimeout(lastTimeout);
+    }
+    lastTimeout = window.setTimeout(function () {
+      renderPhotos();
+    }, 500);
   };
 
   var onLoadSuccess = function (response) {
     photos = response.slice(0, NUMBER_OF_PHOTOS);
     renderPhotos();
     filtersContainer.classList.remove('img-filters--inactive');
+    [].forEach.call(filtersButtons, function (button) {
+      button.addEventListener('click', onFiltersButtonClick);
+    });
   };
 
   var onLoadError = function (errorMessage) {
