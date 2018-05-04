@@ -9,9 +9,19 @@
   var filtersButtons = filtersContainer.querySelectorAll('.img-filters__button');
   var documentFragment = document.createDocumentFragment();
 
-  var renderPhotos = function () {
+  var removeOldPhotos = function () {
+    var oldPhotos = picturesBlock.querySelectorAll('.picture__link');
+    if (oldPhotos !== null) {
+      [].forEach.call(oldPhotos, function (element) {
+        picturesBlock.removeChild(element);
+      });
+    }
+  };
+
+  var renderPhotos = function (filteredPhotos) {
+    removeOldPhotos();
     // добиваюсь нужного мне количества фотографий при помощи ф-ции с циклом внутри, вставляю каждую во фрагмент и далее - в DOM
-    photos.forEach(function (item) {
+    filteredPhotos.forEach(function (item) {
       documentFragment.appendChild(window.picture.createPhotoElement(item));
     });
     picturesBlock.appendChild(documentFragment);
@@ -20,37 +30,38 @@
   var lastTimeout;
   var onFiltersButtonClick = function (evt) {
     var activeElement = evt.target;
+    filtersContainer.querySelector('.img-filters__button--active').classList.remove('img-filters__button--active');
     activeElement.classList.add('img-filters__button--active');
-    // var photosCopy = photos.slice();
+    var photosCopy = photos.slice();
 
     switch (activeElement.id) {
       case 'filter-popular':
-        photos = photos.sort(function (first, second) {
+        photosCopy = photos.sort(function (first, second) {
           return second.likes - first.likes;
         });
         break;
 
       case 'filter-discussed':
-        photos = photos.sort(function (first, second) {
+        photosCopy = photos.sort(function (first, second) {
           return second.comments.length - first.comments.length;
         });
         break;
 
       case 'filter-random':
-        photos = window.util.shuffleArray(photos);
+        photosCopy = window.util.shuffleArray(photosCopy);
         break;
     }
     if (lastTimeout) {
       window.clearTimeout(lastTimeout);
     }
     lastTimeout = window.setTimeout(function () {
-      renderPhotos();
+      renderPhotos(photosCopy);
     }, 500);
   };
 
   var onLoadSuccess = function (response) {
     photos = response.slice(0, NUMBER_OF_PHOTOS);
-    renderPhotos();
+    renderPhotos(photos);
     filtersContainer.classList.remove('img-filters--inactive');
     [].forEach.call(filtersButtons, function (button) {
       button.addEventListener('click', onFiltersButtonClick);
