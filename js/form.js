@@ -1,11 +1,14 @@
 'use strict';
 
 (function () {
-  // ---------------------------------------------------------------------------------------------------
   // form.js — модуль, который работает с формой редактирования изображения
+  var TAG_MAX_LENGTH = 20;
+  var TAG_MIN_LENGTH = 2;
+  var TAGS_MAX_QUANTITY = 5;
+
   var picturesBlock = document.querySelector('.pictures');
   var imgUploadForm = picturesBlock.querySelector('.img-upload__form');
-  var uploadFileInput = imgUploadForm.querySelector('#upload-file');
+  var uploadFileInput = imgUploadForm.querySelector('#upload-file'); // форма
   var imgUploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
   var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
   var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
@@ -13,7 +16,11 @@
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
   var messageError = imgUploadForm.querySelector('.img-upload__message--error');
 
-  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
+  var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
+  var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
+  var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
+
+  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview'); // фото
   var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
   var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
   var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
@@ -59,6 +66,28 @@
 
   // добавление обработчика закрытия окна редактирования фото на крестик окна редактирования
   imgUploadCancel.addEventListener('click', onImgUploadCancelClick);
+
+  // ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ ----- работаем с загрузкой фото
+
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+  uploadFileInput.addEventListener('change', function () {
+    var file = uploadFileInput.files[0];
+    var fileName = file.name.toLowerCase();
+
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+
+    if (matches) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', function () {
+        imgUploadPreview.querySelector('img').src = reader.result;
+      });
+
+      reader.readAsDataURL(file);
+    }
+  });
 
   // ---------------------------------------------------------------------------------------------------
   // ---------------------- ЭФФЕКТЫ
@@ -137,17 +166,11 @@
     }
   };
 
-    // вешаем обработчики на все элементы - создаем псевдомассив(?) и на каждый из элементов псевдомассива кнопок
-    // навешиваем обработчик (?)
-
   [].forEach.call(effectsRadioElements, function (filter) {
     filter.addEventListener('click', onEffectRadioElementClick);
   });
   // ---------------------------------------------------------------------------------------------------
-  // -------------------------------- Работаем с масштабом загруженного фото
-  var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
-  var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
-  var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
+  // Работаем с масштабом загруженного фото
 
   var Resize = {
     STEP: 25,
@@ -233,48 +256,52 @@
 
   // ---------------------------------------------------------------------------------------------------
   // Валидация - работа с хештегами
-  var TAG_MAX_LENGTH = 20;
-  var TAG_MIN_LENGTH = 2;
-  var TAGS_MAX_QUANTITY = 5;
+
+  var validateHashTags = function (hashtags) {
+    for (var i = 0; i < hashtags.length; i++) {
+      if (hashtags[i].length > TAG_MAX_LENGTH) {
+        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
+        return false;
+      }
+      if (hashtags[i].length < TAG_MIN_LENGTH) {
+        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
+        return false;
+      }
+      if (hashtags[i] === '#') {
+        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+        return false;
+      }
+      if (hashtags.length > TAGS_MAX_QUANTITY) {
+        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
+        return false;
+      }
+      // создаем новый массив и добавляем в него повторяющеся элементы из исходного массива хэш-тегов -
+      // - на каждой итерации в новый массив записыватся повторения одного и того же хештега
+      var newArr = [];
+      hashtags.forEach(function (item) {
+        if (item === hashtags[i]) {
+          newArr.push(item);
+        }
+      });
+      if (newArr.length > 1) {
+        hashtagInput.setCustomValidity('Хеш-тэги не должны повторяться');
+        return false;
+      }
+    }
+    return true;
+  };
 
   hashtagInput.addEventListener('input', function () {
     var hashtagsString = hashtagInput.value.trim();
     var hashtags = hashtagsString.split(' ');
-    var correct = true;
 
+    // вынести валидацию в отдельную функцию,
+    // убрать бы correct а вместо него расставить return,
+    // чтобы не было лишних проверок
     if (hashtags.length > 0) {
-      for (var i = 0; i < hashtags.length; i++) {
-        if (hashtags[i].length > TAG_MAX_LENGTH) {
-          hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
-          correct = false;
-        }
-        if (hashtags[i].length < TAG_MIN_LENGTH) {
-          hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
-          correct = false;
-        }
-        if (hashtags[i] === '#') {
-          hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
-          correct = false;
-        }
-        if (hashtags.length > TAGS_MAX_QUANTITY) {
-          hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
-          correct = false;
-        }
-        // создаем новый массив и добавляем в него повторяющеся элементы из исходного массива хэш-тегов -
-        // - на каждой итерации в новый массив записыватся повторения одного и того же хештега
-        var newArr = [];
-        hashtags.forEach(function (item) {
-          if (item === hashtags[i]) {
-            newArr.push(item);
-          }
-        });
-        if (newArr.length > 1) {
-          hashtagInput.setCustomValidity('Хеш-тэги не должны повторяться');
-          correct = false;
-        }
-        if (correct) {
-          hashtagInput.setCustomValidity('');
-        }
+
+      if (validateHashTags(hashtags)) {
+        hashtagInput.setCustomValidity('');
       }
     }
   });
