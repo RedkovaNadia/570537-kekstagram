@@ -21,6 +21,7 @@
   var onFiltersButtonClick = function (evt) {
     var activeElement = evt.target;
     activeElement.classList.add('img-filters__button--active');
+    // var photosCopy = photos.slice();
 
     switch (activeElement.id) {
       case 'filter-popular':

@@ -5,7 +5,7 @@
   // form.js — модуль, который работает с формой редактирования изображения
   var picturesBlock = document.querySelector('.pictures');
   var imgUploadForm = picturesBlock.querySelector('.img-upload__form');
-  var uploadFileInput = imgUploadForm.querySelector('#upload-file');
+  var uploadFileInput = imgUploadForm.querySelector('#upload-file'); // форма
   var imgUploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
   var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
   var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
@@ -13,7 +13,7 @@
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
   var messageError = imgUploadForm.querySelector('.img-upload__message--error');
 
-  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
+  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview'); // фото
   var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
   var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
   var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
@@ -59,6 +59,28 @@
 
   // добавление обработчика закрытия окна редактирования фото на крестик окна редактирования
   imgUploadCancel.addEventListener('click', onImgUploadCancelClick);
+
+  // ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ ----- работаем с загрузкой фото
+
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+  uploadFileInput.addEventListener('change', function () {
+    var file = uploadFileInput.files[0];
+    var fileName = file.name.toLowerCase();
+
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+
+    if (matches) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', function () {
+        imgUploadPreview.querySelector('img').src = reader.result;
+      });
+
+      reader.readAsDataURL(file);
+    }
+  });
 
   // ---------------------------------------------------------------------------------------------------
   // ---------------------- ЭФФЕКТЫ
@@ -136,9 +158,6 @@
       imgUploadScale.classList.remove('hidden');
     }
   };
-
-    // вешаем обработчики на все элементы - создаем псевдомассив(?) и на каждый из элементов псевдомассива кнопок
-    // навешиваем обработчик (?)
 
   [].forEach.call(effectsRadioElements, function (filter) {
     filter.addEventListener('click', onEffectRadioElementClick);
@@ -241,8 +260,8 @@
     var hashtagsString = hashtagInput.value.trim();
     var hashtags = hashtagsString.split(' ');
     var correct = true;
-    // 3 там все нормально, я бы только вынес валидацию в отдельную функцию,
-    // убрал бы correct а вместо него расставил return,
+    // вынести валидацию в отдельную функцию,
+    // убрать бы correct а вместо него расставить return,
     // чтобы не было лишних проверок
     if (hashtags.length > 0) {
       for (var i = 0; i < hashtags.length; i++) {
@@ -283,6 +302,8 @@
   // ------------------------------------------------работаем с отправкой данных
 
   var onUploadError = function () {
+    // imgUploadOverlay.classList.add('hidden');
+    // cleanImageFilters();
     messageError.classList.remove('hidden');
   };
 
