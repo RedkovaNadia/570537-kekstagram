@@ -1,8 +1,11 @@
 'use strict';
 
 (function () {
-  // ---------------------------------------------------------------------------------------------------
   // form.js — модуль, который работает с формой редактирования изображения
+  var TAG_MAX_LENGTH = 20;
+  var TAG_MIN_LENGTH = 2;
+  var TAGS_MAX_QUANTITY = 5;
+
   var picturesBlock = document.querySelector('.pictures');
   var imgUploadForm = picturesBlock.querySelector('.img-upload__form');
   var uploadFileInput = imgUploadForm.querySelector('#upload-file'); // форма
@@ -12,6 +15,10 @@
   var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
   var messageError = imgUploadForm.querySelector('.img-upload__message--error');
+
+  var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
+  var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
+  var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
 
   var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview'); // фото
   var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
@@ -163,10 +170,7 @@
     filter.addEventListener('click', onEffectRadioElementClick);
   });
   // ---------------------------------------------------------------------------------------------------
-  // -------------------------------- Работаем с масштабом загруженного фото
-  var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
-  var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
-  var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
+  // Работаем с масштабом загруженного фото
 
   var Resize = {
     STEP: 25,
@@ -252,9 +256,6 @@
 
   // ---------------------------------------------------------------------------------------------------
   // Валидация - работа с хештегами
-  var TAG_MAX_LENGTH = 20;
-  var TAG_MIN_LENGTH = 2;
-  var TAGS_MAX_QUANTITY = 5;
 
   var validateHashTags = function (hashtags) {
     for (var i = 0; i < hashtags.length; i++) {

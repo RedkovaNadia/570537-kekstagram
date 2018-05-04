@@ -1,9 +1,9 @@
 'use strict';
 
 (function () {
-  var SUCCESS_STATUS_CODE = 200;
   var LOAD_URL = 'https://js.dump.academy/kekstagram/data';
   var UPLOAD_URL = 'https://js.dump.academy/kekstagram';
+  var SUCCESS_STATUS_CODE = 200;
 
   var getServerConnection = function (onLoad, onError, method, url, data) {
     var xhr = new XMLHttpRequest();

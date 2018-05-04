@@ -2,8 +2,9 @@
 
 (function () {
   // НА ОСНОВАНИИ ДАННЫХ И Ф-ЦИИ СОЗДАНИЯ ФОТО - ВСТАВКА КАЖДОЙ ИЗ ФРАГМЕНТА В ДОМ (25 МИНИАТЮР)
-  var photos = [];
   var NUMBER_OF_PHOTOS = 25;
+  var TIMEOUT = 500;
+  var photos = [];
   var picturesBlock = document.querySelector('.pictures');
   var filtersContainer = document.querySelector('.img-filters ');
   var filtersButtons = filtersContainer.querySelectorAll('.img-filters__button');
@@ -56,7 +57,7 @@
     }
     lastTimeout = window.setTimeout(function () {
       renderPhotos(photosCopy);
-    }, 500);
+    }, TIMEOUT);
   };
 
   var onLoadSuccess = function (response) {
