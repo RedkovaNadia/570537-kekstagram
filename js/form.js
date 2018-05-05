@@ -2,6 +2,7 @@
 
 (function () {
   // form.js — модуль, который работает с формой редактирования изображения
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
   var TAG_MAX_LENGTH = 20;
   var TAG_MIN_LENGTH = 2;
   var TAGS_MAX_QUANTITY = 5;
@@ -28,6 +29,13 @@
   var scaleLevel = scaleLine.querySelector('.scale__level'); // линия уровня (тянется за ползунком)
   var prevClass = 'effects__preview--none';
 
+  var cleanImageFilters = function () {
+    imgUploadForm.reset();
+
+    applyImageFilter('effects__preview--none');
+    resizeImage(100);
+  };
+
   // ф-ция-обработчик, которая закрывает окно редактирования по нажатию на esc
   // (и не закрывает, если инпут ввода хэш-тега или комментария в фокусе)
   var onUploadOverlayEscPress = function (evt) {
@@ -36,13 +44,6 @@
     } else {
       window.util.isEscEvent(evt, onImgUploadCancelClick);
     }
-  };
-
-  var cleanImageFilters = function () {
-    imgUploadForm.reset();
-
-    applyImageFilter('effects__preview--none');
-    imageResize(100);
   };
 
   // ф-ция открывает окно редактирования загруженного фото и добавляет обработчик закрытия окна настройки по нажатия esc на документе
@@ -69,7 +70,6 @@
 
   // ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ ----- работаем с загрузкой фото
 
-  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
   uploadFileInput.addEventListener('change', function () {
     var file = uploadFileInput.files[0];
     var fileName = file.name.toLowerCase();
@@ -169,6 +169,7 @@
   [].forEach.call(effectsRadioElements, function (filter) {
     filter.addEventListener('click', onEffectRadioElementClick);
   });
+
   // ---------------------------------------------------------------------------------------------------
   // Работаем с масштабом загруженного фото
 
@@ -178,13 +179,13 @@
     MIN: 25
   };
 
-  var imageResize = function (resizeValue) {
+  var resizeImage = function (resizeValue) {
     imgUploadPreview.style = 'transform: scale(' + (resizeValue / 100) + ')';
   };
 
   var printResizeValue = function (number) {
     resizeControlValueInput.value = number + '%';
-    imageResize(number);
+    resizeImage(number);
   };
 
   var onResizePlusButtonClick = function () {
@@ -230,7 +231,6 @@
         x: moveEvt.clientX
       };
 
-      // в координаты пина записываем новые координаты
       var scaleLineWidth = scaleLine.offsetWidth;
       var calculatedLeft = scalePin.offsetLeft - shift.x;
       calculatedLeft = (calculatedLeft > scaleLineWidth) ? scaleLineWidth : calculatedLeft;
@@ -257,18 +257,20 @@
   // ---------------------------------------------------------------------------------------------------
   // Валидация - работа с хештегами
 
-  var validateHashTags = function (hashtags) {
+  var validateHashtags = function (hashtags) {
     for (var i = 0; i < hashtags.length; i++) {
       if (hashtags[i].length > TAG_MAX_LENGTH) {
         hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
         return false;
       }
-      if (hashtags[i].length < TAG_MIN_LENGTH) {
-        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
-        return false;
-      }
       if (hashtags[i] === '#') {
         hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+        // if (hashtags[i].charAt(0) !== '#') {
+        // hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+        return false;
+      }
+      if (hashtags[i].length < TAG_MIN_LENGTH) {
+        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
         return false;
       }
       if (hashtags.length > TAGS_MAX_QUANTITY) {
@@ -295,12 +297,9 @@
     var hashtagsString = hashtagInput.value.trim();
     var hashtags = hashtagsString.split(' ');
 
-    // вынести валидацию в отдельную функцию,
-    // убрать бы correct а вместо него расставить return,
-    // чтобы не было лишних проверок
     if (hashtags.length > 0) {
 
-      if (validateHashTags(hashtags)) {
+      if (validateHashtags(hashtags)) {
         hashtagInput.setCustomValidity('');
       }
     }

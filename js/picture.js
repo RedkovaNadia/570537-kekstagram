@@ -2,7 +2,6 @@
 
 (function () {
 // СОЗДАНИЕ DOM-элемента (ЭЛЕМЕНТ ФОТОГРАФИИ, МИНИАТЮРА)
-
 // На основе данных объектов массива и шаблона создаю DOM-элементы, соответствующие фотографиям и заполняю их данными из массива
   var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture__link');
   var createPhotoElement = function (object) {
@@ -21,6 +20,7 @@
 
     return photoElement;
   };
+
   window.picture = {
     createPhotoElement: createPhotoElement
   };
