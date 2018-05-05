@@ -5,7 +5,7 @@
   var TIMEOUT = 500;
   var photos = [];
   var picturesBlock = document.querySelector('.pictures');
-  var filtersContainer = document.querySelector('.img-filters ');
+  var filtersContainer = document.querySelector('.img-filters');
   var filtersButtons = filtersContainer.querySelectorAll('.img-filters__button');
   var documentFragment = document.createDocumentFragment();
 
@@ -18,10 +18,9 @@
     }
   };
 
-  // НА ОСНОВАНИИ ДАННЫХ И Ф-ЦИИ СОЗДАНИЯ ФОТО - ВСТАВКА КАЖДОЙ ИЗ ФРАГМЕНТА В ДОМ (25 МИНИАТЮР)
   var renderPhotos = function (filteredPhotos) {
     removeOriginalPhotos();
-    // добиваюсь нужного мне количества фотографий при помощи ф-ции с циклом внутри, вставляю каждую во фрагмент и далее - в DOM
+
     filteredPhotos.forEach(function (item) {
       documentFragment.appendChild(window.picture.createPhotoElement(item));
     });
@@ -69,17 +68,9 @@
     });
   };
 
-  var onLoadError = function (errorMessage) {
-    var node = document.createElement('div');
-    node.style = 'z-index: 100; margin: 0 auto; text-align: center; background-color: red;';
-    node.style.position = 'absolute';
-    node.style.left = '0';
-    node.style.right = '0';
-    node.style.fontSize = '30px';
+  window.backend.loadData(onLoadSuccess, window.backend.onConnectionError);
 
-    node.textContent = errorMessage;
-    document.body.insertAdjacentElement('afterbegin', node);
+  window.gallery = {
+    picturesBlock: picturesBlock
   };
-
-  window.backend.loadData(onLoadSuccess, onLoadError);
 })();

@@ -32,5 +32,3 @@
     isEscEvent: isEscEvent
   };
 })();
-
-
