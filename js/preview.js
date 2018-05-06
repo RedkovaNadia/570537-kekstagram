@@ -1,10 +1,9 @@
 'use strict';
 
 (function () {
-
-  var bigPictureElement = document.querySelector('.big-picture');
-  var bigPictureCancel = bigPictureElement.querySelector('.big-picture__cancel');
-  var socialComments = bigPictureElement.querySelector('.social__comments');
+  var bigPicture = document.querySelector('.big-picture');
+  var bigPictureCancel = bigPicture.querySelector('.big-picture__cancel');
+  var socialComments = bigPicture.querySelector('.social__comments');
 
   var appendComment = function (text) {
     var commentElement = document.createElement('li');
@@ -24,11 +23,10 @@
     return commentElement;
   };
 
-  // ЗАПОЛНЕНИЕ ЭЛЕМЕНТА БОЛЬШОЙ ФОТОГРАФИИ ДАННЫМИ ИЗ МАССИВА
   var renderBigPicture = function (object) {
-    bigPictureElement.querySelector('img').src = object.url;
-    bigPictureElement.querySelector('.likes-count').textContent = object.likes;
-    bigPictureElement.querySelector('.comments-count').textContent = object.comments.length;
+    bigPicture.querySelector('img').src = object.url;
+    bigPicture.querySelector('.likes-count').textContent = object.likes;
+    bigPicture.querySelector('.comments-count').textContent = object.comments.length;
 
     var documentFragment = document.createDocumentFragment();
     socialComments.innerHTML = '';
@@ -38,40 +36,34 @@
     });
 
     socialComments.appendChild(documentFragment);
-    bigPictureElement.querySelector('.social__caption').textContent = object.comments[0];
+    bigPicture.querySelector('.social__caption').textContent = object.comments[0];
   };
 
-  // Прячу блоки счётчика комментариев и загрузки новых комментариев
   var addVisuallyHiddenClass = function (element, selector) {
     element.querySelector(selector).classList.add('visually-hidden');
   };
 
   var socialCommentCountClass = '.social__comment-count';
   var socialCommentLoadmoreClass = '.social__comment-loadmore';
-  addVisuallyHiddenClass(bigPictureElement, socialCommentCountClass);
-  addVisuallyHiddenClass(bigPictureElement, socialCommentLoadmoreClass);
+  addVisuallyHiddenClass(bigPicture, socialCommentCountClass);
+  addVisuallyHiddenClass(bigPicture, socialCommentLoadmoreClass);
 
-  // НАЧИНАЕМ РАБОТАТЬ С ОБРАБОТЧИКАМИ СОБЫТИЙ
-
-  // ф-ция открывает большое фото удалением у блока класса hidden
   var openBigPicture = function () {
-    bigPictureElement.classList.remove('hidden');
+    bigPicture.classList.remove('hidden');
     document.querySelector('body').classList.add('modal-open');
     document.addEventListener('keydown', onBigPictureEscPress);
   };
 
-  // ф-ция закрывает большую фотографию по нажатию esc на документа
   var onBigPictureEscPress = function (evt) {
     window.util.isEscEvent(evt, onBigPictureCancelClick);
   };
 
-  // ф-ция закрывает большое фото длбавлением блоку класс hidden и удаляет обработчик закрытия фото по esc
   var onBigPictureCancelClick = function () {
-    bigPictureElement.classList.add('hidden');
+    bigPicture.classList.add('hidden');
     document.querySelector('body').classList.remove('modal-open');
     document.removeEventListener('keydown', onBigPictureEscPress);
   };
-  // добавление обработчика закрытия большого фото по клику на крестик элемента
+
   bigPictureCancel.addEventListener('click', onBigPictureCancelClick);
 
   window.preview = {

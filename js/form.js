@@ -1,75 +1,62 @@
 'use strict';
 
 (function () {
-  // form.js — модуль, который работает с формой редактирования изображения
-  var TAG_MAX_LENGTH = 20;
-  var TAG_MIN_LENGTH = 2;
-  var TAGS_MAX_QUANTITY = 5;
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+  var SCALE_LEVEL_PROCENT_MAX = 100;
 
-  var picturesBlock = document.querySelector('.pictures');
-  var imgUploadForm = picturesBlock.querySelector('.img-upload__form');
-  var uploadFileInput = imgUploadForm.querySelector('#upload-file'); // форма
+  var imgUploadForm = window.gallery.picturesContainer.querySelector('.img-upload__form');
+  var uploadFileInput = imgUploadForm.querySelector('#upload-file');
   var imgUploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
   var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
-  var hashtagInput = imgUploadOverlay.querySelector('.text__hashtags');
+  var hashTagInput = imgUploadOverlay.querySelector('.text__hashtags');
   var descriptionTextarea = imgUploadOverlay.querySelector('.text__description');
   var imgUploadScale = imgUploadForm.querySelector('.img-upload__scale');
-  var messageError = imgUploadForm.querySelector('.img-upload__message--error');
 
   var resizeMinusButton = imgUploadOverlay.querySelector('.resize__control--minus');
   var resizePlusButton = imgUploadOverlay.querySelector('.resize__control--plus');
   var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
 
-  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview'); // фото
-  var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
-  var scaleLine = imgUploadScale.querySelector('.scale__line'); // находим блок слайдера
-  var scaleValue = imgUploadScale.querySelector('.scale__value'); // находим блок, который принимает уровень насыщенности эффекта
-  var scalePin = scaleLine.querySelector('.scale__pin'); // находим блок пина
-  var scaleLevel = scaleLine.querySelector('.scale__level'); // линия уровня (тянется за ползунком)
+  var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
+  var effectsRadioItems = imgUploadOverlay.querySelectorAll('.effects__radio');
+  var scaleLine = imgUploadScale.querySelector('.scale__line');
+  var scaleValue = imgUploadScale.querySelector('.scale__value');
+  var scalePin = scaleLine.querySelector('.scale__pin');
+  var scaleLevel = scaleLine.querySelector('.scale__level');
   var prevClass = 'effects__preview--none';
 
-  // ф-ция-обработчик, которая закрывает окно редактирования по нажатию на esc
-  // (и не закрывает, если инпут ввода хэш-тега или комментария в фокусе)
+  var cleanImageEditingWindow = function () {
+    imgUploadForm.reset();
+
+    applyImageFilter('effects__preview--none');
+    resizeImage(Size.MAX);
+  };
+
   var onUploadOverlayEscPress = function (evt) {
-    if (hashtagInput === evt.target || descriptionTextarea === evt.target) {
+    if (hashTagInput === evt.target || descriptionTextarea === evt.target) {
       evt.stopPropagation();
     } else {
       window.util.isEscEvent(evt, onImgUploadCancelClick);
     }
   };
 
-  var cleanImageFilters = function () {
-    imgUploadForm.reset();
-
-    applyImageFilter('effects__preview--none');
-    imageResize(100);
-  };
-
-  // ф-ция открывает окно редактирования загруженного фото и добавляет обработчик закрытия окна настройки по нажатия esc на документе
   var onUploadFileInputChange = function () {
     imgUploadOverlay.classList.remove('hidden');
     document.addEventListener('keydown', onUploadOverlayEscPress);
     imgUploadScale.classList.add('hidden');
   };
 
-    // ф-ция закрывает окно редактирования загруженного фото и удаляет обработчик закрытия окна настройки по нажатия esc на документе
   var onImgUploadCancelClick = function () {
-    cleanImageFilters();
+    cleanImageEditingWindow();
     imgUploadOverlay.classList.add('hidden');
-    // сбрасываем значение инпута загрузки, чтобы было возможно загружать одно фото повторно
+
     uploadFileInput.value = null;
     document.removeEventListener('keydown', onUploadOverlayEscPress);
   };
 
-    // добавление обработчика открытия окна редактирования фото на форму загрузки нового фото
   uploadFileInput.addEventListener('change', onUploadFileInputChange);
 
-  // добавление обработчика закрытия окна редактирования фото на крестик окна редактирования
   imgUploadCancel.addEventListener('click', onImgUploadCancelClick);
 
-  // ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ ----- работаем с загрузкой фото
-
-  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
   uploadFileInput.addEventListener('change', function () {
     var file = uploadFileInput.files[0];
     var fileName = file.name.toLowerCase();
@@ -89,33 +76,26 @@
     }
   });
 
-  // ---------------------------------------------------------------------------------------------------
-  // ---------------------- ЭФФЕКТЫ
-  // добавляем эффекты на загруженное фото
-
-  // принимает уровень эффекта - берет его из поля
   var getFilterLevel = function () {
     return parseInt(scaleValue.value, 10);
   };
 
-  // задает полю число, задает пину смещение, задает длину слайдера (линии)
   var setScaleLevelWidth = function (number) {
     scaleValue.value = number;
     scalePin.style.left = number + '%';
     scaleLevel.style.width = number + '%';
   };
 
-    // задает ффильтр картинке в стилях - принимает на вход блок картинки, уровень насыщенности, выбранную радиокнопку
-  var setImgFilter = function (img, level, selected) {
+  var setImageFilter = function (img, level, selected) {
     var effectFilter;
 
     switch (selected) {
       case 'chrome':
-        effectFilter = 'grayscale(' + (level / 100) + ')';
+        effectFilter = 'grayscale(' + (level / SCALE_LEVEL_PROCENT_MAX) + ')';
         break;
 
       case 'sepia':
-        effectFilter = 'sepia(' + (level / 100) + ')';
+        effectFilter = 'sepia(' + (level / SCALE_LEVEL_PROCENT_MAX) + ')';
         break;
 
       case 'marvin':
@@ -123,15 +103,14 @@
         break;
 
       case 'phobos':
-        effectFilter = 'blur(' + (3 * level / 100) + 'px)';
+        effectFilter = 'blur(' + (3 * level / SCALE_LEVEL_PROCENT_MAX) + 'px)';
         break;
 
       case 'heat':
-        var levelEffect = (3 * level / 100) || 1;
+        var levelEffect = (3 * level / SCALE_LEVEL_PROCENT_MAX) || 1;
         effectFilter = 'brightness(' + levelEffect + ')';
         break;
-        // фрагмент кода выполняется при отсутствии
-        // совпадений со значениями представленных вариантов
+
       default:
         effectFilter = 'none';
         break;
@@ -139,26 +118,22 @@
     img.style.filter = effectFilter;
   };
 
-  // ф-ция, которая добавляет класс картинке в зависимости от выбранного эффекта
   var applyImageFilter = function (selected) {
-    // определяем новый класс в зависимости от выбранной радиокнопки эффекта
     var newClass = 'effects__preview--' + selected;
 
-    // добавляем картинке новый класс - удаляем предыдущий
     imgUploadPreview.classList.add(newClass);
     imgUploadPreview.classList.remove(prevClass);
-    // вызываем ф-цию, задающей фильтр картинке в стилях
-    setImgFilter(imgUploadPreview, getFilterLevel(), selected);
+
+    setImageFilter(imgUploadPreview, getFilterLevel(), selected);
 
     prevClass = newClass;
   };
 
-    // обработчик, добавляющий эффекты (добавлением соответствующего класса картинке)
-  var onEffectRadioElementClick = function (evt) {
-    // нижняя строка нужна при обработчике события ДВИЖЕНИЯ мыши
-    setScaleLevelWidth(100);
-    // добавляет картинке фильтр в зависимости от выбранной радиокнопки
+  var onEffectRadioItemClick = function (evt) {
+    setScaleLevelWidth(SCALE_LEVEL_PROCENT_MAX);
+
     applyImageFilter(evt.target.value);
+
     if (imgUploadPreview.classList.contains('effects__preview--none')) {
       imgUploadScale.classList.add('hidden');
     } else {
@@ -166,37 +141,35 @@
     }
   };
 
-  [].forEach.call(effectsRadioElements, function (filter) {
-    filter.addEventListener('click', onEffectRadioElementClick);
+  [].forEach.call(effectsRadioItems, function (filter) {
+    filter.addEventListener('click', onEffectRadioItemClick);
   });
-  // ---------------------------------------------------------------------------------------------------
-  // Работаем с масштабом загруженного фото
 
-  var Resize = {
+  var Size = {
     STEP: 25,
     MAX: 100,
     MIN: 25
   };
 
-  var imageResize = function (resizeValue) {
-    imgUploadPreview.style = 'transform: scale(' + (resizeValue / 100) + ')';
+  var resizeImage = function (resizeValue) {
+    imgUploadPreview.style = 'transform: scale(' + (resizeValue / Size.MAX) + ')';
   };
 
   var printResizeValue = function (number) {
     resizeControlValueInput.value = number + '%';
-    imageResize(number);
+    resizeImage(number);
   };
 
   var onResizePlusButtonClick = function () {
-    var resizeValue = parseInt(resizeControlValueInput.value, 10) + Resize.STEP;
-    resizeValue = (resizeValue > Resize.MAX) ? Resize.MAX : resizeValue;
+    var resizeValue = parseInt(resizeControlValueInput.value, 10) + Size.STEP;
+    resizeValue = (resizeValue > Size.MAX) ? Size.MAX : resizeValue;
 
     printResizeValue(resizeValue);
   };
 
   var onResizeMinusButtonClick = function () {
-    var resizeValue = parseInt(resizeControlValueInput.value, 10) - Resize.STEP;
-    resizeValue = (resizeValue < Resize.MIN) ? Resize.MIN : resizeValue;
+    var resizeValue = parseInt(resizeControlValueInput.value, 10) - Size.STEP;
+    resizeValue = (resizeValue < Size.MIN) ? Size.MIN : resizeValue;
 
     printResizeValue(resizeValue);
   };
@@ -204,47 +177,40 @@
   resizeMinusButton.addEventListener('click', onResizeMinusButtonClick);
   resizePlusButton.addEventListener('click', onResizePlusButtonClick);
 
-  // ---------------------------------------------------------------------------------------------------
-  // Движение пина
-
-  var setImgFilerLevel = function (level) {
+  var setImageFilerLevel = function (level) {
     var selectedFilter = imgUploadOverlay.querySelector('input[name=effect]:checked');
     applyImageFilter(selectedFilter.value);
-    setImgFilter(imgUploadPreview, level, selectedFilter.value);
+    setImageFilter(imgUploadPreview, level, selectedFilter.value);
   };
 
   scalePin.addEventListener('mousedown', function (evt) {
 
-    // получаем стартовые координаты курсора
-    var startCoords = {
+    var startCoord = {
       x: evt.clientX
     };
 
     var onMouseMove = function (moveEvt) {
-      // вычисляем расстояние, на которое сместился курсор мыши
       var shift = {
-        x: startCoords.x - moveEvt.clientX
+        x: startCoord.x - moveEvt.clientX
       };
-      // переписываем 'точку отсчета' - она каждый раз меняется
-      startCoords = {
+
+      startCoord = {
         x: moveEvt.clientX
       };
 
-      // в координаты пина записываем новые координаты
       var scaleLineWidth = scaleLine.offsetWidth;
       var calculatedLeft = scalePin.offsetLeft - shift.x;
       calculatedLeft = (calculatedLeft > scaleLineWidth) ? scaleLineWidth : calculatedLeft;
       calculatedLeft = (calculatedLeft < 0) ? 0 : calculatedLeft;
-      // задаем положение пина (нужны только x-координаты)
       scalePin.style.left = calculatedLeft + 'px';
-      // вычисляем уровень насыщенности эффекта
-      var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
+
+      var scalePinLevel = Math.round(scalePin.offsetLeft * SCALE_LEVEL_PROCENT_MAX / scaleLineWidth);
       setScaleLevelWidth(scalePinLevel);
-      setImgFilerLevel(scalePinLevel);
+      setImageFilerLevel(scalePinLevel);
     };
 
     var onMouseUp = function () {
-      setImgFilerLevel(getFilterLevel());
+      setImageFilerLevel(getFilterLevel());
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
@@ -254,69 +220,71 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
-  // ---------------------------------------------------------------------------------------------------
-  // Валидация - работа с хештегами
+  var Tag = {
+    MAX_LENGTH: 20,
+    MIN_LENGTH: 2,
+    MAX_QUANTITY: 5
+  };
 
-  var validateHashTags = function (hashtags) {
-    for (var i = 0; i < hashtags.length; i++) {
-      if (hashtags[i].length > TAG_MAX_LENGTH) {
-        hashtagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
+  var validateHashTags = function (hashTags) {
+    for (var i = 0; i < hashTags.length; i++) {
+      if (hashTags[i].charAt(0) !== '#') {
+        hashTagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
         return false;
       }
-      if (hashtags[i].length < TAG_MIN_LENGTH) {
-        hashtagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
+
+      if (hashTags[i].length < Tag.MIN_LENGTH) {
+        hashTagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
         return false;
       }
-      if (hashtags[i] === '#') {
-        hashtagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
+
+      if (hashTags[i].substring(1).indexOf('#') > 0) {
+        hashTagInput.setCustomValidity('Хэш-теги должны разделяться пробелами');
         return false;
       }
-      if (hashtags.length > TAGS_MAX_QUANTITY) {
-        hashtagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
+
+      if (hashTags[i].length > Tag.MAX_LENGTH) {
+        hashTagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
         return false;
       }
-      // создаем новый массив и добавляем в него повторяющеся элементы из исходного массива хэш-тегов -
-      // - на каждой итерации в новый массив записыватся повторения одного и того же хештега
+      if (hashTags.length > Tag.MAX_QUANTITY) {
+        hashTagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
+        return false;
+      }
+
       var newArr = [];
-      hashtags.forEach(function (item) {
-        if (item === hashtags[i]) {
+      hashTags.forEach(function (item) {
+        if (item === hashTags[i]) {
           newArr.push(item);
         }
       });
+
       if (newArr.length > 1) {
-        hashtagInput.setCustomValidity('Хеш-тэги не должны повторяться');
+        hashTagInput.setCustomValidity('Хэш-тэги не должны повторяться');
         return false;
       }
     }
     return true;
   };
 
-  hashtagInput.addEventListener('input', function () {
-    var hashtagsString = hashtagInput.value.trim();
-    var hashtags = hashtagsString.split(' ');
+  hashTagInput.addEventListener('input', function () {
+    var hashTagsString = hashTagInput.value.trim().toLowerCase();
+    var hashTags = hashTagsString.split(' ');
 
-    // вынести валидацию в отдельную функцию,
-    // убрать бы correct а вместо него расставить return,
-    // чтобы не было лишних проверок
-    if (hashtags.length > 0) {
+    if (hashTags.length > 0) {
 
-      if (validateHashTags(hashtags)) {
-        hashtagInput.setCustomValidity('');
+      if (validateHashTags(hashTags)) {
+        hashTagInput.setCustomValidity('');
       }
     }
   });
-  // ------------------------------------------------работаем с отправкой данных
-
-  var onUploadError = function () {
-    messageError.classList.remove('hidden');
-  };
 
   imgUploadForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
     window.backend.uploadData(function () {
       imgUploadOverlay.classList.add('hidden');
-      cleanImageFilters();
-    }, onUploadError, new FormData(imgUploadForm));
+      cleanImageEditingWindow();
+    }, window.backend.onConnectionError, new FormData(imgUploadForm));
   });
 })();
 
