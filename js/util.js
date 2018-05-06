@@ -13,6 +13,7 @@
   var shuffleArray = function (array) {
     var arrayCopy = array.slice();
     var mixedArray = [];
+
     while (mixedArray.length < array.length) {
       var randomIndex = getRandomIndex(arrayCopy);
       mixedArray.push(arrayCopy[randomIndex]);
@@ -26,6 +27,7 @@
       action();
     }
   };
+
   window.util = {
     getRandomNumber: getRandomNumber,
     shuffleArray: shuffleArray,

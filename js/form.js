@@ -2,11 +2,9 @@
 
 (function () {
   var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
-  var TAG_MAX_LENGTH = 20;
-  var TAG_MIN_LENGTH = 2;
-  var TAGS_MAX_QUANTITY = 5;
+  var SCALE_LEVEL_PROCENT_MAX = 100;
 
-  var imgUploadForm = window.gallery.picturesBlock.querySelector('.img-upload__form');
+  var imgUploadForm = window.gallery.picturesContainer.querySelector('.img-upload__form');
   var uploadFileInput = imgUploadForm.querySelector('#upload-file');
   var imgUploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
   var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
@@ -19,7 +17,7 @@
   var resizeControlValueInput = imgUploadOverlay.querySelector('.resize__control--value');
 
   var imgUploadPreview = imgUploadOverlay.querySelector('.img-upload__preview');
-  var effectsRadioElements = imgUploadOverlay.querySelectorAll('.effects__radio');
+  var effectsRadioItems = imgUploadOverlay.querySelectorAll('.effects__radio');
   var scaleLine = imgUploadScale.querySelector('.scale__line');
   var scaleValue = imgUploadScale.querySelector('.scale__value');
   var scalePin = scaleLine.querySelector('.scale__pin');
@@ -30,7 +28,7 @@
     imgUploadForm.reset();
 
     applyImageFilter('effects__preview--none');
-    resizeImage(100);
+    resizeImage(Size.MAX);
   };
 
   var onUploadOverlayEscPress = function (evt) {
@@ -82,7 +80,6 @@
     return parseInt(scaleValue.value, 10);
   };
 
-  // задает полю число, задает пину смещение, задает длину слайдера (линии)
   var setScaleLevelWidth = function (number) {
     scaleValue.value = number;
     scalePin.style.left = number + '%';
@@ -94,11 +91,11 @@
 
     switch (selected) {
       case 'chrome':
-        effectFilter = 'grayscale(' + (level / 100) + ')';
+        effectFilter = 'grayscale(' + (level / SCALE_LEVEL_PROCENT_MAX) + ')';
         break;
 
       case 'sepia':
-        effectFilter = 'sepia(' + (level / 100) + ')';
+        effectFilter = 'sepia(' + (level / SCALE_LEVEL_PROCENT_MAX) + ')';
         break;
 
       case 'marvin':
@@ -106,11 +103,11 @@
         break;
 
       case 'phobos':
-        effectFilter = 'blur(' + (3 * level / 100) + 'px)';
+        effectFilter = 'blur(' + (3 * level / SCALE_LEVEL_PROCENT_MAX) + 'px)';
         break;
 
       case 'heat':
-        var levelEffect = (3 * level / 100) || 1;
+        var levelEffect = (3 * level / SCALE_LEVEL_PROCENT_MAX) || 1;
         effectFilter = 'brightness(' + levelEffect + ')';
         break;
 
@@ -132,8 +129,8 @@
     prevClass = newClass;
   };
 
-  var onEffectRadioElementClick = function (evt) {
-    setScaleLevelWidth(100);
+  var onEffectRadioItemClick = function (evt) {
+    setScaleLevelWidth(SCALE_LEVEL_PROCENT_MAX);
 
     applyImageFilter(evt.target.value);
 
@@ -144,18 +141,18 @@
     }
   };
 
-  [].forEach.call(effectsRadioElements, function (filter) {
-    filter.addEventListener('click', onEffectRadioElementClick);
+  [].forEach.call(effectsRadioItems, function (filter) {
+    filter.addEventListener('click', onEffectRadioItemClick);
   });
 
-  var Resize = {
+  var Size = {
     STEP: 25,
     MAX: 100,
     MIN: 25
   };
 
   var resizeImage = function (resizeValue) {
-    imgUploadPreview.style = 'transform: scale(' + (resizeValue / 100) + ')';
+    imgUploadPreview.style = 'transform: scale(' + (resizeValue / Size.MAX) + ')';
   };
 
   var printResizeValue = function (number) {
@@ -164,15 +161,15 @@
   };
 
   var onResizePlusButtonClick = function () {
-    var resizeValue = parseInt(resizeControlValueInput.value, 10) + Resize.STEP;
-    resizeValue = (resizeValue > Resize.MAX) ? Resize.MAX : resizeValue;
+    var resizeValue = parseInt(resizeControlValueInput.value, 10) + Size.STEP;
+    resizeValue = (resizeValue > Size.MAX) ? Size.MAX : resizeValue;
 
     printResizeValue(resizeValue);
   };
 
   var onResizeMinusButtonClick = function () {
-    var resizeValue = parseInt(resizeControlValueInput.value, 10) - Resize.STEP;
-    resizeValue = (resizeValue < Resize.MIN) ? Resize.MIN : resizeValue;
+    var resizeValue = parseInt(resizeControlValueInput.value, 10) - Size.STEP;
+    resizeValue = (resizeValue < Size.MIN) ? Size.MIN : resizeValue;
 
     printResizeValue(resizeValue);
   };
@@ -188,16 +185,16 @@
 
   scalePin.addEventListener('mousedown', function (evt) {
 
-    var startCoords = {
+    var startCoord = {
       x: evt.clientX
     };
 
     var onMouseMove = function (moveEvt) {
       var shift = {
-        x: startCoords.x - moveEvt.clientX
+        x: startCoord.x - moveEvt.clientX
       };
 
-      startCoords = {
+      startCoord = {
         x: moveEvt.clientX
       };
 
@@ -207,7 +204,7 @@
       calculatedLeft = (calculatedLeft < 0) ? 0 : calculatedLeft;
       scalePin.style.left = calculatedLeft + 'px';
 
-      var scalePinLevel = Math.round(scalePin.offsetLeft * 100 / scaleLineWidth);
+      var scalePinLevel = Math.round(scalePin.offsetLeft * SCALE_LEVEL_PROCENT_MAX / scaleLineWidth);
       setScaleLevelWidth(scalePinLevel);
       setImageFilerLevel(scalePinLevel);
     };
@@ -223,33 +220,47 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
+  var Tag = {
+    MAX_LENGTH: 20,
+    MIN_LENGTH: 2,
+    MAX_QUANTITY: 5
+  };
+
   var validateHashTags = function (hashTags) {
     for (var i = 0; i < hashTags.length; i++) {
-      if (hashTags[i].length > TAG_MAX_LENGTH) {
-        hashTagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
-        return false;
-      }
       if (hashTags[i].charAt(0) !== '#') {
         hashTagInput.setCustomValidity('Хэш-тег должен начинаться с символа "#"');
         return false;
       }
-      if (hashTags[i].length < TAG_MIN_LENGTH) {
+
+      if (hashTags[i].length < Tag.MIN_LENGTH) {
         hashTagInput.setCustomValidity('Пожалуйста, введите текст хэш-тега');
         return false;
       }
-      if (hashTags.length > TAGS_MAX_QUANTITY) {
+
+      if (hashTags[i].substring(1).indexOf('#') > 0) {
+        hashTagInput.setCustomValidity('Хэш-теги должны разделяться пробелами');
+        return false;
+      }
+
+      if (hashTags[i].length > Tag.MAX_LENGTH) {
+        hashTagInput.setCustomValidity('Длина хэш-тега не должна превышать двадцати символов, включая знак "#"');
+        return false;
+      }
+      if (hashTags.length > Tag.MAX_QUANTITY) {
         hashTagInput.setCustomValidity('Пожалуйста, сократите количество хэш-тегов: нельзя использовать больше пяти');
         return false;
       }
 
       var newArr = [];
       hashTags.forEach(function (item) {
-        if (item.toLowerCase() === hashTags[i].toLowerCase()) {
+        if (item === hashTags[i]) {
           newArr.push(item);
         }
       });
+
       if (newArr.length > 1) {
-        hashTagInput.setCustomValidity('Хеш-тэги не должны повторяться');
+        hashTagInput.setCustomValidity('Хэш-тэги не должны повторяться');
         return false;
       }
     }
@@ -257,8 +268,8 @@
   };
 
   hashTagInput.addEventListener('input', function () {
-    var hashtagsString = hashTagInput.value.trim();
-    var hashTags = hashtagsString.split(' ');
+    var hashTagsString = hashTagInput.value.trim().toLowerCase();
+    var hashTags = hashTagsString.split(' ');
 
     if (hashTags.length > 0) {
 

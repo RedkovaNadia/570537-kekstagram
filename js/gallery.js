@@ -4,16 +4,16 @@
   var NUMBER_OF_PHOTOS = 25;
   var TIMEOUT = 500;
   var photos = [];
-  var picturesBlock = document.querySelector('.pictures');
+  var picturesContainer = document.querySelector('.pictures');
   var filtersContainer = document.querySelector('.img-filters');
   var filtersButtons = filtersContainer.querySelectorAll('.img-filters__button');
   var documentFragment = document.createDocumentFragment();
 
   var removeOriginalPhotos = function () {
-    var originalPhotos = picturesBlock.querySelectorAll('.picture__link');
+    var originalPhotos = picturesContainer.querySelectorAll('.picture__link');
     if (originalPhotos !== null) {
       [].forEach.call(originalPhotos, function (element) {
-        picturesBlock.removeChild(element);
+        picturesContainer.removeChild(element);
       });
     }
   };
@@ -24,7 +24,7 @@
     filteredPhotos.forEach(function (item) {
       documentFragment.appendChild(window.picture.createPhotoElement(item));
     });
-    picturesBlock.appendChild(documentFragment);
+    picturesContainer.appendChild(documentFragment);
   };
 
   var lastTimeout;
@@ -36,13 +36,13 @@
 
     switch (activeElement.id) {
       case 'filter-popular':
-        photosArrayCopy = photos.sort(function (first, second) {
+        photosArrayCopy = photosArrayCopy.sort(function (first, second) {
           return second.likes - first.likes;
         });
         break;
 
       case 'filter-discussed':
-        photosArrayCopy = photos.sort(function (first, second) {
+        photosArrayCopy = photosArrayCopy.sort(function (first, second) {
           return second.comments.length - first.comments.length;
         });
         break;
@@ -51,9 +51,11 @@
         photosArrayCopy = window.util.shuffleArray(photosArrayCopy);
         break;
     }
+
     if (lastTimeout) {
       window.clearTimeout(lastTimeout);
     }
+
     lastTimeout = window.setTimeout(function () {
       renderPhotos(photosArrayCopy);
     }, TIMEOUT);
@@ -71,6 +73,6 @@
   window.backend.loadData(onLoadSuccess, window.backend.onConnectionError);
 
   window.gallery = {
-    picturesBlock: picturesBlock
+    picturesContainer: picturesContainer
   };
 })();

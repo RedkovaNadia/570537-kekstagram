@@ -10,6 +10,7 @@
   var getServerConnection = function (onLoad, onError, method, message, url, data) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
+
     xhr.addEventListener('load', function () {
       if (xhr.status === SUCCESS_STATUS_CODE) {
         onLoad(xhr.response);
@@ -27,15 +28,15 @@
   };
 
   var onConnectionError = function (errorMessage) {
-    var node = document.createElement('div');
-    node.style = 'z-index: 100; margin: 0 auto; text-align: center; background-color: red;';
-    node.style.position = 'absolute';
-    node.style.left = '0';
-    node.style.right = '0';
-    node.style.fontSize = '30px';
+    var divElement = document.createElement('div');
+    divElement.style = 'z-index: 100; margin: 0 auto; text-align: center; background-color: red;';
+    divElement.style.position = 'absolute';
+    divElement.style.left = '0';
+    divElement.style.right = '0';
+    divElement.style.fontSize = '30px';
 
-    node.textContent = errorMessage;
-    document.body.insertAdjacentElement('afterbegin', node);
+    divElement.textContent = errorMessage;
+    document.body.insertAdjacentElement('afterbegin', divElement);
   };
 
   window.backend = {
