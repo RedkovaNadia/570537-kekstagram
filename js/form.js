@@ -2,7 +2,7 @@
 
 (function () {
   var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
-  var SCALE_LEVEL_PROCENT_MAX = 100;
+  var SCALE_LEVEL_PERCENT_MAX = 100;
 
   var imgUploadForm = window.gallery.picturesContainer.querySelector('.img-upload__form');
   var uploadFileInput = imgUploadForm.querySelector('#upload-file');
@@ -91,11 +91,11 @@
 
     switch (selected) {
       case 'chrome':
-        effectFilter = 'grayscale(' + (level / SCALE_LEVEL_PROCENT_MAX) + ')';
+        effectFilter = 'grayscale(' + (level / SCALE_LEVEL_PERCENT_MAX) + ')';
         break;
 
       case 'sepia':
-        effectFilter = 'sepia(' + (level / SCALE_LEVEL_PROCENT_MAX) + ')';
+        effectFilter = 'sepia(' + (level / SCALE_LEVEL_PERCENT_MAX) + ')';
         break;
 
       case 'marvin':
@@ -103,11 +103,11 @@
         break;
 
       case 'phobos':
-        effectFilter = 'blur(' + (3 * level / SCALE_LEVEL_PROCENT_MAX) + 'px)';
+        effectFilter = 'blur(' + (3 * level / SCALE_LEVEL_PERCENT_MAX) + 'px)';
         break;
 
       case 'heat':
-        var levelEffect = (3 * level / SCALE_LEVEL_PROCENT_MAX) || 1;
+        var levelEffect = (3 * level / SCALE_LEVEL_PERCENT_MAX) || 1;
         effectFilter = 'brightness(' + levelEffect + ')';
         break;
 
@@ -130,7 +130,7 @@
   };
 
   var onEffectRadioItemClick = function (evt) {
-    setScaleLevelWidth(SCALE_LEVEL_PROCENT_MAX);
+    setScaleLevelWidth(SCALE_LEVEL_PERCENT_MAX);
 
     applyImageFilter(evt.target.value);
 
@@ -204,7 +204,7 @@
       calculatedLeft = (calculatedLeft < 0) ? 0 : calculatedLeft;
       scalePin.style.left = calculatedLeft + 'px';
 
-      var scalePinLevel = Math.round(scalePin.offsetLeft * SCALE_LEVEL_PROCENT_MAX / scaleLineWidth);
+      var scalePinLevel = Math.round(scalePin.offsetLeft * SCALE_LEVEL_PERCENT_MAX / scaleLineWidth);
       setScaleLevelWidth(scalePinLevel);
       setImageFilerLevel(scalePinLevel);
     };
