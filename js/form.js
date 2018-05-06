@@ -152,7 +152,7 @@
   };
 
   var resizeImage = function (resizeValue) {
-    imgUploadPreview.style = 'transform: scale(' + (resizeValue / Size.MAX) + ')';
+    imgUploadPreview.style.transform = 'scale(' + (resizeValue / Size.MAX) + ')';
   };
 
   var printResizeValue = function (number) {
